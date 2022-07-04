@@ -1,0 +1,5 @@
+C:\Users\Moham\Desktop\Steinhart Programm\WinFormsApp1.exe
+C:\Users\Moham\Desktop\Steinhart Programm\WinFormsApp1.dll
+C:\Users\Moham\Desktop\Steinhart Programm\WinFormsApp1.deps.json
+C:\Users\Moham\Desktop\Steinhart Programm\WinFormsApp1.runtimeconfig.json
+C:\Users\Moham\Desktop\Steinhart Programm\WinFormsApp1.pdb
