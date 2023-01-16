@@ -19,9 +19,9 @@ namespace WinFormsApp1
             InitializeComponent();
             this.Datei = Datei;
         }
+        // Datei in DataGrid laden
         private void DruckSuchen_Load(object sender, EventArgs e)
         {
-            
             DataTable dataTable = new DataTable();
             string connStr = "server=localhost;user=root;database=movedb;port=3306;password=6540";
             MySqlConnection conn = new MySqlConnection(connStr);
@@ -54,7 +54,7 @@ namespace WinFormsApp1
             {
                 MessageBox.Show(ex.Message);
             }
-            
+            DruckSuchenOK.Select();
         }
 
         private void Button2_Click(object sender, EventArgs e)
@@ -139,12 +139,11 @@ namespace WinFormsApp1
             try
             {
                 dataGridView1.Columns[0].Visible = false;
-                dataGridView1.Columns[1].Visible = false;
-                for (int i = 8; i < 55; i++)
+                for (int i = 7; i < 53; i++)
                 {
                     dataGridView1.Columns[i].Visible = false;
                 }
-                for (int i = 2; i < 8; i++)
+                for (int i = 1; i < 7; i++)
                 {
                     dataGridView1.Columns[i].Width = 200;
                 }
