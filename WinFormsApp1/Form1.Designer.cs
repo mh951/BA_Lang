@@ -47,7 +47,6 @@ namespace WinFormsApp1
             this.druckdatenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bandToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.druckfarbeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.ausdruckToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fensterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.druckenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.seite2ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -136,6 +135,7 @@ namespace WinFormsApp1
             this.radioButton20 = new System.Windows.Forms.RadioButton();
             this.radioButton19 = new System.Windows.Forms.RadioButton();
             this.label23 = new System.Windows.Forms.Label();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.AbstandVonAussen)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Druckzeit)).BeginInit();
@@ -147,6 +147,7 @@ namespace WinFormsApp1
             // 
             // menuStrip1
             // 
+            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.dateiToolStripMenuItem,
             this.druckeToolStripMenuItem,
@@ -201,7 +202,7 @@ namespace WinFormsApp1
             // 
             this.druckSuchenToolStripMenuItem.Name = "druckSuchenToolStripMenuItem";
             this.druckSuchenToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
-            this.druckSuchenToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
+            this.druckSuchenToolStripMenuItem.Size = new System.Drawing.Size(234, 22);
             this.druckSuchenToolStripMenuItem.Text = "Druck suchen";
             this.druckSuchenToolStripMenuItem.Click += new System.EventHandler(this.DruckSuchenToolStripMenuItem_Click);
             // 
@@ -209,7 +210,7 @@ namespace WinFormsApp1
             // 
             this.drToolStripMenuItem.Name = "drToolStripMenuItem";
             this.drToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F7;
-            this.drToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
+            this.drToolStripMenuItem.Size = new System.Drawing.Size(234, 22);
             this.drToolStripMenuItem.Text = "letzter Druck";
             this.drToolStripMenuItem.Click += new System.EventHandler(this.DrToolStripMenuItem_Click);
             // 
@@ -217,14 +218,14 @@ namespace WinFormsApp1
             // 
             this.druckSpeichernToolStripMenuItem.Name = "druckSpeichernToolStripMenuItem";
             this.druckSpeichernToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.druckSpeichernToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
+            this.druckSpeichernToolStripMenuItem.Size = new System.Drawing.Size(234, 22);
             this.druckSpeichernToolStripMenuItem.Text = "Druck speichern";
             this.druckSpeichernToolStripMenuItem.Click += new System.EventHandler(this.DruckSpeichernToolStripMenuItem_Click);
             // 
             // druckToolStripMenuItem
             // 
             this.druckToolStripMenuItem.Name = "druckToolStripMenuItem";
-            this.druckToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
+            this.druckToolStripMenuItem.Size = new System.Drawing.Size(234, 22);
             this.druckToolStripMenuItem.Text = "Druck ändern";
             this.druckToolStripMenuItem.Click += new System.EventHandler(this.DruckToolStripMenuItem_Click);
             // 
@@ -232,7 +233,7 @@ namespace WinFormsApp1
             // 
             this.druckLöschenToolStripMenuItem.Name = "druckLöschenToolStripMenuItem";
             this.druckLöschenToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Y)));
-            this.druckLöschenToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
+            this.druckLöschenToolStripMenuItem.Size = new System.Drawing.Size(234, 22);
             this.druckLöschenToolStripMenuItem.Text = "Druck löschen";
             this.druckLöschenToolStripMenuItem.Click += new System.EventHandler(this.DruckLöschenToolStripMenuItem_Click);
             // 
@@ -240,7 +241,7 @@ namespace WinFormsApp1
             // 
             this.druckNeuToolStripMenuItem.Name = "druckNeuToolStripMenuItem";
             this.druckNeuToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F8;
-            this.druckNeuToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
+            this.druckNeuToolStripMenuItem.Size = new System.Drawing.Size(234, 22);
             this.druckNeuToolStripMenuItem.Text = "Druck neu";
             this.druckNeuToolStripMenuItem.Click += new System.EventHandler(this.DruckNeuToolStripMenuItem_Click);
             // 
@@ -248,7 +249,7 @@ namespace WinFormsApp1
             // 
             this.archivdruckToolStripMenuItem.Name = "archivdruckToolStripMenuItem";
             this.archivdruckToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F6)));
-            this.archivdruckToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
+            this.archivdruckToolStripMenuItem.Size = new System.Drawing.Size(234, 22);
             this.archivdruckToolStripMenuItem.Text = "Archivdruck suchen";
             this.archivdruckToolStripMenuItem.Click += new System.EventHandler(this.ArchivdruckToolStripMenuItem_Click);
             // 
@@ -256,7 +257,7 @@ namespace WinFormsApp1
             // 
             this.archivdruckSpeichernToolStripMenuItem.Name = "archivdruckSpeichernToolStripMenuItem";
             this.archivdruckSpeichernToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-            this.archivdruckSpeichernToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
+            this.archivdruckSpeichernToolStripMenuItem.Size = new System.Drawing.Size(234, 22);
             this.archivdruckSpeichernToolStripMenuItem.Text = "Archivdruck speichern";
             this.archivdruckSpeichernToolStripMenuItem.Click += new System.EventHandler(this.ArchivdruckSpeichernToolStripMenuItem_Click);
             // 
@@ -264,7 +265,7 @@ namespace WinFormsApp1
             // 
             this.letzterDruckArchivToolStripMenuItem.Name = "letzterDruckArchivToolStripMenuItem";
             this.letzterDruckArchivToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F7)));
-            this.letzterDruckArchivToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
+            this.letzterDruckArchivToolStripMenuItem.Size = new System.Drawing.Size(234, 22);
             this.letzterDruckArchivToolStripMenuItem.Text = "Letzter Druck Archiv";
             this.letzterDruckArchivToolStripMenuItem.Click += new System.EventHandler(this.LetzterDruckArchivToolStripMenuItem_Click);
             // 
@@ -272,8 +273,7 @@ namespace WinFormsApp1
             // 
             this.druckdatenToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.bandToolStripMenuItem,
-            this.druckfarbeToolStripMenuItem,
-            this.ausdruckToolStripMenuItem});
+            this.druckfarbeToolStripMenuItem});
             this.druckdatenToolStripMenuItem.Name = "druckdatenToolStripMenuItem";
             this.druckdatenToolStripMenuItem.Size = new System.Drawing.Size(80, 20);
             this.druckdatenToolStripMenuItem.Text = "Druckdaten";
@@ -281,23 +281,16 @@ namespace WinFormsApp1
             // bandToolStripMenuItem
             // 
             this.bandToolStripMenuItem.Name = "bandToolStripMenuItem";
-            this.bandToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
+            this.bandToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.bandToolStripMenuItem.Text = "Band";
             this.bandToolStripMenuItem.Click += new System.EventHandler(this.BandToolStripMenuItem_Click);
             // 
             // druckfarbeToolStripMenuItem
             // 
             this.druckfarbeToolStripMenuItem.Name = "druckfarbeToolStripMenuItem";
-            this.druckfarbeToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
+            this.druckfarbeToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.druckfarbeToolStripMenuItem.Text = "Druckfarbe";
             this.druckfarbeToolStripMenuItem.Click += new System.EventHandler(this.DruckfarbeToolStripMenuItem_Click);
-            // 
-            // ausdruckToolStripMenuItem
-            // 
-            this.ausdruckToolStripMenuItem.Name = "ausdruckToolStripMenuItem";
-            this.ausdruckToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
-            this.ausdruckToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
-            this.ausdruckToolStripMenuItem.Text = "Ausdruck";
             // 
             // fensterToolStripMenuItem
             // 
@@ -321,6 +314,7 @@ namespace WinFormsApp1
             this.druckenToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F1;
             this.druckenToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
             this.druckenToolStripMenuItem.Text = "Drucken";
+            this.druckenToolStripMenuItem.Click += new System.EventHandler(this.druckenToolStripMenuItem_Click);
             // 
             // seite2ToolStripMenuItem
             // 
@@ -328,6 +322,7 @@ namespace WinFormsApp1
             this.seite2ToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F1)));
             this.seite2ToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
             this.seite2ToolStripMenuItem.Text = "Seite 2";
+            this.seite2ToolStripMenuItem.Click += new System.EventHandler(this.seite2ToolStripMenuItem_Click);
             // 
             // automSuchenToolStripMenuItem
             // 
@@ -335,6 +330,7 @@ namespace WinFormsApp1
             this.automSuchenToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F2;
             this.automSuchenToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
             this.automSuchenToolStripMenuItem.Text = "Autom. Suchen";
+            this.automSuchenToolStripMenuItem.Click += new System.EventHandler(this.automSuchenToolStripMenuItem_Click);
             // 
             // textDruckfensterToolStripMenuItem
             // 
@@ -342,6 +338,7 @@ namespace WinFormsApp1
             this.textDruckfensterToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F3;
             this.textDruckfensterToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
             this.textDruckfensterToolStripMenuItem.Text = "Text/ Druckfenster";
+            this.textDruckfensterToolStripMenuItem.Click += new System.EventHandler(this.textDruckfensterToolStripMenuItem_Click);
             // 
             // referenzfahrtToolStripMenuItem
             // 
@@ -349,6 +346,7 @@ namespace WinFormsApp1
             this.referenzfahrtToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F4;
             this.referenzfahrtToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
             this.referenzfahrtToolStripMenuItem.Text = "Referenzfahrt";
+            this.referenzfahrtToolStripMenuItem.Click += new System.EventHandler(this.referenzfahrtToolStripMenuItem_Click);
             // 
             // schriftplattWechselnToolStripMenuItem
             // 
@@ -371,6 +369,7 @@ namespace WinFormsApp1
             this.teildruckToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F11;
             this.teildruckToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
             this.teildruckToolStripMenuItem.Text = "Teildruck";
+            this.teildruckToolStripMenuItem.Click += new System.EventHandler(this.teildruckToolStripMenuItem_Click);
             // 
             // dauersuchenToolStripMenuItem
             // 
@@ -378,6 +377,7 @@ namespace WinFormsApp1
             this.dauersuchenToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F2)));
             this.dauersuchenToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
             this.dauersuchenToolStripMenuItem.Text = "Dauersuchen";
+            this.dauersuchenToolStripMenuItem.Click += new System.EventHandler(this.dauersuchenToolStripMenuItem_Click);
             // 
             // Vorschläge
             // 
@@ -389,11 +389,6 @@ namespace WinFormsApp1
             "Als Abschiedsgruß",
             "Als letzten Gruß",
             "Als letzter Gruß",
-            "Aus Dankbarkeit",
-            "Deine Arbeitskameraden",
-            "Deine Arbeitskollegen",
-            "Deine Enkelkinder",
-            "Deine Kinder und Enkel",
             "Die letzten Grüße",
             "Du bleibst uns unvergessen",
             "Ein letzter Gruß",
@@ -425,18 +420,8 @@ namespace WinFormsApp1
             "Letzte Grüße",
             "Letzte liebe Grüße",
             "Letzter Gruß",
-            "Meinem lieben Mann",
-            "Meinem lieben Opa",
-            "Meinem lieben Vater",
-            "Meiner lieben Frau",
-            "Meiner lieben Mutter",
-            "Meiner lieben Oma",
             "Mit stillem Gruß",
             "Ruhe in Frieden",
-            "Unserem lieben Opa",
-            "Unserem lieben Vater",
-            "Unserer lieben Mutter",
-            "Unserer lieben Oma",
             "Unvergeßlich bleibst Du",
             "Wir werden Dich nie vergessen",
             "Wir werden immer an Dich denken",
@@ -563,6 +548,7 @@ namespace WinFormsApp1
             this.Sperren1.Name = "Sperren1";
             this.Sperren1.Size = new System.Drawing.Size(24, 29);
             this.Sperren1.TabIndex = 12;
+            this.Sperren1.TextChanged += new System.EventHandler(this.Sperren1_TextChanged);
             this.Sperren1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TextBox2_KeyPress);
             // 
             // LaengeZeile1
@@ -604,6 +590,7 @@ namespace WinFormsApp1
             this.Sperren2.Name = "Sperren2";
             this.Sperren2.Size = new System.Drawing.Size(24, 29);
             this.Sperren2.TabIndex = 18;
+            this.Sperren2.TextChanged += new System.EventHandler(this.Sperren2_TextChanged);
             this.Sperren2.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TextBox7_KeyPress);
             // 
             // label6
@@ -651,6 +638,7 @@ namespace WinFormsApp1
             this.Sperren3.Name = "Sperren3";
             this.Sperren3.Size = new System.Drawing.Size(24, 29);
             this.Sperren3.TabIndex = 24;
+            this.Sperren3.TextChanged += new System.EventHandler(this.Sperren3_TextChanged);
             this.Sperren3.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TextBox11_KeyPress);
             // 
             // label7
@@ -698,6 +686,7 @@ namespace WinFormsApp1
             this.Sperren4.Name = "Sperren4";
             this.Sperren4.Size = new System.Drawing.Size(24, 29);
             this.Sperren4.TabIndex = 30;
+            this.Sperren4.TextChanged += new System.EventHandler(this.Sperren4_TextChanged);
             this.Sperren4.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TextBox15_KeyPress);
             // 
             // label8
@@ -745,6 +734,7 @@ namespace WinFormsApp1
             this.Sperren5.Name = "Sperren5";
             this.Sperren5.Size = new System.Drawing.Size(24, 29);
             this.Sperren5.TabIndex = 36;
+            this.Sperren5.TextChanged += new System.EventHandler(this.Sperren5_TextChanged);
             this.Sperren5.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TextBox19_KeyPress);
             // 
             // label9
@@ -792,6 +782,7 @@ namespace WinFormsApp1
             this.Sperren6.Name = "Sperren6";
             this.Sperren6.Size = new System.Drawing.Size(24, 29);
             this.Sperren6.TabIndex = 42;
+            this.Sperren6.TextChanged += new System.EventHandler(this.Sperren6_TextChanged);
             this.Sperren6.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TextBox23_KeyPress);
             // 
             // label10
@@ -814,6 +805,7 @@ namespace WinFormsApp1
             this.Zeile6.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.Zeile6.Click += new System.EventHandler(this.Zeile6_Click);
             this.Zeile6.TextChanged += new System.EventHandler(this.Zeile6_TextChanged);
+            this.Zeile6.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Zeile6_KeyDown);
             // 
             // label11
             // 
@@ -965,7 +957,7 @@ namespace WinFormsApp1
             this.Druckstärke.Size = new System.Drawing.Size(60, 23);
             this.Druckstärke.TabIndex = 60;
             this.Druckstärke.Value = new decimal(new int[] {
-            100,
+            90,
             0,
             0,
             0});
@@ -1105,6 +1097,7 @@ namespace WinFormsApp1
             this.ReferenzFahrt.Text = "Referenzfahrt";
             this.ReferenzFahrt.UseVisualStyleBackColor = true;
             this.ReferenzFahrt.Visible = false;
+            this.ReferenzFahrt.Click += new System.EventHandler(this.ReferenzFahrt_Click);
             // 
             // SchriftWechseln
             // 
@@ -1131,6 +1124,7 @@ namespace WinFormsApp1
             this.StopButton.Text = "S T O P";
             this.StopButton.UseVisualStyleBackColor = false;
             this.StopButton.Visible = false;
+            this.StopButton.Click += new System.EventHandler(this.StopButton_Click);
             // 
             // panel7
             // 
@@ -1309,11 +1303,15 @@ namespace WinFormsApp1
             this.label23.TabIndex = 80;
             this.label23.Text = "Info";
             // 
+            // backgroundWorker1
+            // 
+            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(871, 595);
+            this.ClientSize = new System.Drawing.Size(871, 605);
             this.Controls.Add(this.label23);
             this.Controls.Add(this.panel8);
             this.Controls.Add(this.panel7);
@@ -1368,7 +1366,6 @@ namespace WinFormsApp1
         private System.Windows.Forms.ToolStripMenuItem letzterDruckArchivToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bandToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem druckfarbeToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem ausdruckToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem druckenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem seite2ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem automSuchenToolStripMenuItem;
@@ -1386,7 +1383,6 @@ namespace WinFormsApp1
         private System.Windows.Forms.CheckBox ArchivCheckBox;
         private System.Windows.Forms.CheckBox DruckCheckBox;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.ComboBox comboBox2;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox Sperren1;
         private System.Windows.Forms.TextBox LaengeZeile1;
@@ -1457,6 +1453,7 @@ namespace WinFormsApp1
         private System.Windows.Forms.RadioButton radioButton20;
         private System.Windows.Forms.RadioButton radioButton19;
         private System.Windows.Forms.TextBox Zeile1;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
     }
 }
 
