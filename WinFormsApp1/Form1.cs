@@ -25,26 +25,40 @@ namespace WinFormsApp1
                              s1, s2, s3, s4, s5, s6, stzNr, BdNr, brte, AVA, srft, frb, gedd, Dtm;
         Dictionary<TextBox, string> GoNull = new Dictionary<TextBox, string> { };
         Dictionary<TextBox, TextBox> Zeilen_Höhe = new Dictionary<TextBox, TextBox> { };
+        Dictionary<TextBox, TextBox> Zeilen_Sperren = new Dictionary<TextBox, TextBox> { };
+        Dictionary<TextBox, TextBox> Zeilen_Länge = new Dictionary<TextBox, TextBox> { };
+        Dictionary<TextBox, TextBox> Zeilen_Aus_Länge = new Dictionary<TextBox, TextBox> { };
+        Dictionary<int, TextBox> Nummer_Zeilen = new Dictionary<int, TextBox> { };
         public string AktuellDruck;
         public string AktuellDatei = "Druckdatei";
         public static bool Referencefahrt_done = false;
         public static bool weiter = true;
+        public static bool Druck_done = false;
+        public static bool USB_geht = false;
         List<char> SonderZeichen = new List<char> {  'Ä', 'Ü', 'Ö', ':', ';', 'é', 'è', 'á', 'à'};
         List<char> Abstände = new List<char> { ' ', '²', '³', '|', '@', 'µ' };
         List<TextBox> Zeilen = new List<TextBox> { };
+        List<TextBox> AlleZeilen = new List<TextBox> { };
         private SerialPort myport;
         private SerialPort myport2;
+        private TextBox Längste_Zeile;
 
 
         public Form1()
         {
             InitializeComponent();
-            Paaren();
+            Paaren_Höhe();
             Zeilen_füllen();
+            Paaren_Sperren();
+            Paaren_Länge();
+            Paaren_Aus_Länge();
+            Paaren_Nummer();
+            AlleZeilen_füllen();
+            backgroundWorker1.WorkerSupportsCancellation= true;
         }
 
         // Jede Zeile mit entsprechender Höhe verknüpfen
-        private void Paaren()
+        private void Paaren_Höhe()
         {
             Zeilen_Höhe.Add(Zeile1, HoeheZeile1);
             Zeilen_Höhe.Add(Zeile2, HoeheZeile2);
@@ -54,15 +68,67 @@ namespace WinFormsApp1
             Zeilen_Höhe.Add(Zeile6, HoeheZeile6);
         }
 
-        // Die Zeilen in einer Liste legen
+        // Jede Zeile mit entsprechender Sperren verknüpfen
+        private void Paaren_Sperren()
+        {
+            Zeilen_Sperren.Add(Zeile1, Sperren1);
+            Zeilen_Sperren.Add(Zeile2, Sperren2);
+            Zeilen_Sperren.Add(Zeile3, Sperren3);
+            Zeilen_Sperren.Add(Zeile4, Sperren4);
+            Zeilen_Sperren.Add(Zeile5, Sperren5);
+            Zeilen_Sperren.Add(Zeile6, Sperren6);
+        }
+
+        // Paaren Zeile-Länge 
+        private void Paaren_Länge()
+        {
+            Zeilen_Länge.Add(Zeile1, LaengeZeile1);
+            Zeilen_Länge.Add(Zeile2, LaengeZeile2);
+            Zeilen_Länge.Add(Zeile3, LaengeZeile3);
+            Zeilen_Länge.Add(Zeile4, LaengeZeile4);
+            Zeilen_Länge.Add(Zeile5, LaengeZeile5);
+            Zeilen_Länge.Add(Zeile6, LaengeZeile6);
+        }
+
+        // Paaren Länge-Zeile
+        private void Paaren_Aus_Länge()
+        {
+            Zeilen_Aus_Länge.Add(LaengeZeile1,Zeile1);
+            Zeilen_Aus_Länge.Add(LaengeZeile2,Zeile2);
+            Zeilen_Aus_Länge.Add(LaengeZeile3,Zeile3);
+            Zeilen_Aus_Länge.Add(LaengeZeile4,Zeile4);
+            Zeilen_Aus_Länge.Add(LaengeZeile5,Zeile5);
+            Zeilen_Aus_Länge.Add(LaengeZeile6,Zeile6);
+
+        }
+        
+        // Jede Zeile mit entsprechende Nummer verknüpfen
+         private void Paaren_Nummer()
+        {
+            Nummer_Zeilen.Add(1, Zeile1);
+            Nummer_Zeilen.Add(2, Zeile2);
+            Nummer_Zeilen.Add(3, Zeile3);
+            Nummer_Zeilen.Add(4, Zeile4);
+            Nummer_Zeilen.Add(5, Zeile5);
+            Nummer_Zeilen.Add(6, Zeile6);
+        }
+
+        // Die Zeilen erste Seite in einer Liste legen
         private void Zeilen_füllen()
         {
             Zeilen.Add(Zeile1);
             Zeilen.Add(Zeile2);
             Zeilen.Add(Zeile3);
-            Zeilen.Add(Zeile4);
-            Zeilen.Add(Zeile5);
-            Zeilen.Add(Zeile6);
+        }
+
+        private void AlleZeilen_füllen()
+        {
+            AlleZeilen.Add(Zeile1);
+            AlleZeilen.Add(Zeile2);
+            AlleZeilen.Add(Zeile3);
+            AlleZeilen.Add(Zeile4);
+            AlleZeilen.Add(Zeile5);
+            AlleZeilen.Add(Zeile6);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -75,6 +141,7 @@ namespace WinFormsApp1
             referenzfahrtToolStripMenuItem.Enabled = false;
             schriftplattWechselnToolStripMenuItem.Enabled = false;
             dauersuchenToolStripMenuItem.Enabled = false;
+            seite2ToolStripMenuItem.Enabled = false;
             AktuellDatei = "Druckdatei";
             this.ActiveControl = SchriftGröße;
             label3.Text = AktuellDatei;
@@ -85,25 +152,20 @@ namespace WinFormsApp1
         {
             if (Bearbeiten_Mode)
             {
-                Bearbeiten_Mode = false;
                 OpenPorts();
+                if (!USB_geht) return;
                 if (!Stempel_prüfen())
                 {
                     MessageBox.Show("Ventil machen!");
                     ClosePorts();
                     return;
                 }
-                if (!Bandhalter_prüfen())
-                {
-                    MessageBox.Show("Bandhalter schließen!");
-                    ClosePorts();
-                    return;
-                }
+                
+                Bearbeiten_Mode = false;
                 DruckMode();
             }
             else
             {
-
                 Bearbeiten_Mode = true;
                 BearbeitenMode();
                 ClosePorts();
@@ -122,13 +184,15 @@ namespace WinFormsApp1
             FensterWechseln.Text = "Textfenster";
             TextSpeichernOrDrucken.Text = "Drucken";
             panel7.Enabled = false;
-            panel8.Enabled = false;
+            Platte.Enabled = false;
+            tableLayoutPanel1.Enabled = false;
             druckenToolStripMenuItem.Enabled = true;
             automSuchenToolStripMenuItem.Enabled = true;
             referenzfahrtToolStripMenuItem.Enabled = true;
             schriftplattWechselnToolStripMenuItem.Enabled = true;
             dauersuchenToolStripMenuItem.Enabled = true;
-
+            teildruckToolStripMenuItem.Enabled = false;
+            seite2ToolStripMenuItem.Enabled = true;
             myport.WriteLine("I1"); //Platte prüfen
             Thread.Sleep(50);
             string platte = myport.ReadExisting();
@@ -136,32 +200,37 @@ namespace WinFormsApp1
 
         }
 
+        // Open Ports
         private void OpenPorts()
         {
+            USB_geht = true;
             try
             {
                 myport = new SerialPort();
                 myport.BaudRate = 9600;
-                myport.PortName = "COM7";
+                myport.PortName = "COM4";
                 myport.Open();
             }
             catch (Exception)
             {
                 MessageBox.Show("Error Arduino");
+                USB_geht = false;
             }
             try
             {
                 myport2 = new SerialPort();
                 myport2.BaudRate = 19200;
-                myport2.PortName = "COM8";
+                myport2.PortName = "COM5";
                 myport2.Open();
             }
             catch (Exception)
             {
                 MessageBox.Show("Error Motor");
+                USB_geht = false;
             }
         }
 
+        // Close Ports
         private void ClosePorts()
         {
             myport.Close();
@@ -186,11 +255,21 @@ namespace WinFormsApp1
             referenzfahrtToolStripMenuItem.Enabled = false;
             schriftplattWechselnToolStripMenuItem.Enabled = false;
             dauersuchenToolStripMenuItem.Enabled = false;
+            teildruckToolStripMenuItem.Enabled = true;
+            Platte.Enabled = true;
+            Druckstärke.Enabled = true;
+            tableLayoutPanel1.Enabled = true;
         }
 
         // Wenn man auf eine Zeile ist und auf Enter kliclt, dann fokusieren auf nächsten Zeile 
         private void Zeile1_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.KeyCode == Keys.Down)
+            {
+                Zeile2.Focus();
+                e.Handled = e.SuppressKeyPress = true;
+                return;
+            }
             if (e.KeyCode == Keys.Enter)
             {
                 Zeile2.Focus();
@@ -250,6 +329,18 @@ namespace WinFormsApp1
 
         private void Zeile2_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.KeyCode == Keys.Up)
+            {
+                Zeile1.Focus();
+                e.Handled = e.SuppressKeyPress = true;
+                return;
+            }
+            if (e.KeyCode == Keys.Down)
+            {
+                Zeile3.Focus();
+                e.Handled = e.SuppressKeyPress = true;
+                return;
+            }
             if (e.KeyCode == Keys.Enter)
             {
                 Zeile3.Focus();
@@ -309,6 +400,18 @@ namespace WinFormsApp1
 
         private void Zeile3_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.KeyCode == Keys.Down)
+            {
+                Zeile4.Focus();
+                e.Handled = e.SuppressKeyPress = true;
+                return;
+            }
+            if (e.KeyCode == Keys.Up)
+            {
+                Zeile2.Focus();
+                e.Handled = e.SuppressKeyPress = true;
+                return;
+            }
             if (e.KeyCode == Keys.Enter)
             {
                 Zeile4.Focus();
@@ -368,6 +471,18 @@ namespace WinFormsApp1
 
         private void Zeile4_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.KeyCode == Keys.Up)
+            {
+                Zeile3.Focus();
+                e.Handled = e.SuppressKeyPress = true;
+                return;
+            }
+            if (e.KeyCode == Keys.Down)
+            {
+                Zeile5.Focus();
+                e.Handled = e.SuppressKeyPress = true;
+                return;
+            }
             if (e.KeyCode == Keys.Enter)
             {
                 Zeile5.Focus();
@@ -427,6 +542,18 @@ namespace WinFormsApp1
 
         private void Zeile5_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.KeyCode == Keys.Down)
+            {
+                Zeile6.Focus();
+                e.Handled = e.SuppressKeyPress = true;
+                return;
+            }
+            if (e.KeyCode == Keys.Up)
+            {
+                Zeile4.Focus();
+                e.Handled = e.SuppressKeyPress = true;
+                return;
+            }
             if (e.KeyCode == Keys.Enter)
             {
                 Zeile6.Focus();
@@ -486,6 +613,12 @@ namespace WinFormsApp1
 
         private void Zeile6_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.KeyCode == Keys.Up)
+            {
+                Zeile5.Focus();
+                e.Handled = e.SuppressKeyPress = true;
+                return;
+            }
             if (e.KeyCode == Keys.D2 && e.Control == true)
             {
                 string newchar = "²";
@@ -829,11 +962,6 @@ namespace WinFormsApp1
                 letzterDruckArchivToolStripMenuItem.PerformClick();
             }
 
-            if (e.KeyCode == Keys.D && e.Control == true)
-            {
-                ausdruckToolStripMenuItem.PerformClick();
-            }
-
             if (e.KeyCode == Keys.F1)
             {
                 druckenToolStripMenuItem.PerformClick();
@@ -974,6 +1102,18 @@ namespace WinFormsApp1
                 else { tb.BackColor = Color.White; }
             }
             Höhste.BackColor = Color.LightPink;
+            Längste_Zeile = Zeilen_Aus_Länge[Höhste];
+        }
+
+        // kontroliere ob alle Zeilen eine Höhe haben
+        private bool Check_Höhe_Hier()
+        {
+            foreach (TextBox i in Zeilen)
+            {
+                string Zum_Drucken = i.Text.Trim();
+                if (!string.IsNullOrEmpty(Zum_Drucken) && string.IsNullOrEmpty(Zeilen_Höhe[i].Text)) return false;
+            }
+            return true;
         }
 
         // Schicken die Zeielen um ihre Länge zu berechnen
@@ -1037,125 +1177,176 @@ namespace WinFormsApp1
             }
             else
             {
-                TextSpeichernOrDrucken.Enabled = false;
-                this.ActiveControl = null;
-
-                if (!Referencefahrt_done)
+                Zeilen.Clear();
+                Zeilen.AddRange(new List<TextBox> { Zeile1, Zeile2, Zeile3 });
+                Drucken(Zeilen);
+                if (!Druck_done) return;
+                if ((Zeile4.Text.Length > 0) || (Zeile5.Text.Length > 0) || (Zeile6.Text.Length > 0))
                 {
-                    MessageBox.Show("Eine Referenzfahrt ist vorher nötig!");
-                    return;
-                }
-                if (Platte_prüfen().Trim() != (SchriftGröße.SelectedIndex + 1).ToString())
-                {
-                    MessageBox.Show("Bitte die richtige Platte benutzen!");
-                    return;
-                }
-                if (!Bandhalter_prüfen())
-                {
-                    MessageBox.Show("Bandhalter schließen!");
-                    return;
-                }
-                if (Schriftgröße == -1)
-                {
-                    MessageBox.Show("Bitte Schriftgröße wählen!");
-                    return;
-                }
-                if (string.IsNullOrEmpty(HoeheZeile1.Text))
-                {
-                    MessageBox.Show("Bitte Höhe wählen!");
-                    return;
-                }
-
-                string Zum_Drucken = Zeile1.Text.Trim();
-                if (string.IsNullOrEmpty(Zum_Drucken)) return;
-                else
-                {
-                    myport.WriteLine("O31"); // Pumpe einschalten
-                    int Sprr = (!string.IsNullOrEmpty(Sperren1.Text)) ? Int32.Parse(Sperren1.Text) : 0;
-                    Tisch_init = 8380 - (Int32.Parse(HoeheZeile1.Text) * 40);
-                    int ABStVA = (int)((AbstandVonAussen.Value - 34) * 40);
-                    
-                    int M3 = 0;
-                    int AnzahlVonABSt = 0;
-                    for (int x = Zum_Drucken.Length; x > 0; x--)
+                    DialogResult dr;
+                    dr = MessageBox.Show("Zweiter Flügel einspannen?", "", MessageBoxButtons.OKCancel);
+                    if (dr == DialogResult.OK)
                     {
-                        int M5;
-                        try
-                        {
-                            if (x == Zum_Drucken.Length)
-                            {
-                                if (SonderZeichen.Contains(Zum_Drucken[x - 1]))
-                                {
-                                    SonderZeichen_Drucken(Zum_Drucken[x - 1],"0", "20", ABStVA.ToString());
-                                    M3 = 0;
-                                    continue;
-                                }
-                                else if (Abstände.Contains(Zum_Drucken[x - 1]))
-                                {
-                                    continue;
-                                }
-                                Motoren_1A_2A_3R_4A_5R(Zum_Drucken[x - 1].ToString(), M3.ToString(), "20", "1", ABStVA);
-                            }
-                            else
-                            {
-                                if (Abstände.Contains(Zum_Drucken[x - 1]))
-                                {
-                                    M3 += Zeichen_Breite(Zum_Drucken[x - 1]) * 4;
-                                    AnzahlVonABSt += 1;
-                                    continue;
-                                }
-                                if (!Abstände.Contains(Zum_Drucken[x]))
-                                {
-                                    M3 += Convert.ToInt32((Zeichen_Breite(Zum_Drucken[x]) + Zeichen_Breite(Zum_Drucken[x - 1])) * 2 + 20);
-                                }
-                                else
-                                {
-                                    M3 += Convert.ToInt32((Zeichen_Breite(Zum_Drucken[x + AnzahlVonABSt]) + Zeichen_Breite(Zum_Drucken[x - 1])) * 2 + 20);
-                                }
-                                
-                                M3 += Sprr * 20;
-                                M5 = Convert.ToInt32((Zeichen_Breite(Zum_Drucken[x + AnzahlVonABSt]) + Zeichen_Breite(Zum_Drucken[x - 1])) * 0.12);
-                                
-
-                                if (SonderZeichen.Contains(Zum_Drucken[x - 1]))
-                                {
-                                    SonderZeichen_Drucken(Zum_Drucken[x - 1], M3.ToString(), M5.ToString());
-                                    M3 = 0;
-                                    continue;
-                                }
-                                Motoren_1A_2A_3R_4A_5R(Zum_Drucken[x - 1].ToString(), M3.ToString(), M5.ToString());
-                            }
-                            Motoren_stehen();
-                            Stempel_ab(Zum_Drucken[x - 1]);
-                            Stempel_auf();
-                            bool Stmp = true;
-                            while (Stmp)
-                            {
-                                Stmp = !Stempel_prüfen();
-                            }
-                            Trennung();
-                            M3 = 0;
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(ex.ToString());
-                        }
+                        Zeilen.Clear();
+                        Zeilen.AddRange(new List<TextBox> { Zeile4, Zeile5, Zeile6 });
+                        Drucken(Zeilen);
+                        Zeilen.Clear();
+                        Zeilen.AddRange(new List<TextBox> { Zeile1, Zeile2, Zeile3 });
                     }
-                    Motore_5_Drehen_Relativ("20");
-                    StartPunkt();
-                    myport.WriteLine("O30"); // Pumpe aus
-                    Tisch_init = 0;
+                    else
+                    {
+                        Druck_done = false;
+                        EmptyTheFields();
+                        return;
+                    }
                 }
-                TextSpeichernOrDrucken.Enabled = true;
-                this.ActiveControl = null;
-
+                Zum_DB();
+                EmptyTheFields();
+                Druck_done = false;
             }
         }
 
+        // Zeilen Drucken
+        private void Drucken(List<TextBox> Zeilen)
+        {
+            TextSpeichernOrDrucken.Enabled = false;
+            this.ActiveControl = null;
 
+            if (!Referencefahrt_done)
+            {
+                MessageBox.Show("Eine Referenzfahrt ist vorher nötig!");
+                TextSpeichernOrDrucken.Enabled = true;
+
+                return;
+            }
+            if (Platte_prüfen().Trim() != (SchriftGröße.SelectedIndex + 1).ToString())
+            {
+                MessageBox.Show("Bitte die richtige Platte benutzen!");
+                TextSpeichernOrDrucken.Enabled = true;
+                return;
+            }
+            if (!Bandhalter_prüfen())
+            {
+                MessageBox.Show("Bandhalter schließen!");
+                TextSpeichernOrDrucken.Enabled = true;
+                return;
+            }
+            if (Schriftgröße == -1)
+            {
+                MessageBox.Show("Bitte Schriftgröße wählen!");
+                TextSpeichernOrDrucken.Enabled = true;
+                return;
+            }
+            if (!Check_Höhe_Hier())
+            {
+                MessageBox.Show("Bitte Höhe wählen!");
+                TextSpeichernOrDrucken.Enabled = true;
+                return;
+            }
+
+            myport.WriteLine("O31"); // Pumpe einschalten
+            foreach (TextBox Zeile in Zeilen)
+            {
+                if (string.IsNullOrEmpty(Zeile.Text)) continue;
+                string Zum_Drucken = Zeile.Text.Trim();
+                int Sprr = (!string.IsNullOrEmpty(Zeilen_Sperren[Zeile].Text)) ? Int32.Parse(Zeilen_Sperren[Zeile].Text) : 0;
+                Tisch_init = 8380 - (Int32.Parse(Zeilen_Höhe[Zeile].Text) * 40);
+                int ABStVA;
+                if (Zeile == Längste_Zeile)
+                {
+                    ABStVA = (int)((AbstandVonAussen.Value - 34) * 40);
+                }
+                else
+                {
+                    ABStVA = (int)((float)((AbstandVonAussen.Value - 34) * 40) +
+                                          (float.Parse(Zeilen_Länge[Längste_Zeile].Text) * 20 + (Anzahl_Zeichen(Längste_Zeile) * 10))
+                                          - (float.Parse(Zeilen_Länge[Zeile].Text) * 20 + (Anzahl_Zeichen(Zeile) * 10)));
+
+                }
+
+                int M3 = 0;
+                int AnzahlVonABSt = 0;
+                for (int x = Zum_Drucken.Length; x > 0; x--)
+                {
+                    int M5;
+                    try
+                    {
+                        if (x == Zum_Drucken.Length)
+                        {
+                            if (SonderZeichen.Contains(Zum_Drucken[x - 1]))
+                            {
+                                SonderZeichen_Drucken(Zeile, Zum_Drucken[x - 1], "0", "20", ABStVA.ToString());
+                                M3 = 0;
+                                continue;
+                            }
+                            else if (Abstände.Contains(Zum_Drucken[x - 1]))
+                            {
+                                continue;
+                            }
+                            int höhe = (Int32.Parse(Zeilen_Höhe[Zeile].Text) * 40);
+                            Motoren_1A_2A_3R_4A_5R(höhe, Zum_Drucken[x - 1].ToString(), M3.ToString(), "20", "1", ABStVA);
+                        }
+                        else
+                        {
+                            if (Abstände.Contains(Zum_Drucken[x - 1]))
+                            {
+                                M3 += Zeichen_Breite(Zum_Drucken[x - 1]) * 4;
+                                AnzahlVonABSt += 1;
+                                continue;
+                            }
+                            if (!Abstände.Contains(Zum_Drucken[x]))
+                            {
+                                M3 += Convert.ToInt32((Zeichen_Breite(Zum_Drucken[x]) + Zeichen_Breite(Zum_Drucken[x - 1])) * 2 + 20);
+                            }
+                            else
+                            {
+                                M3 += Convert.ToInt32((Zeichen_Breite(Zum_Drucken[x + AnzahlVonABSt]) + Zeichen_Breite(Zum_Drucken[x - 1])) * 2 + 20);
+                            }
+
+                            M3 += Sprr * 20;
+                            M5 = Convert.ToInt32((Zeichen_Breite(Zum_Drucken[x + AnzahlVonABSt]) + Zeichen_Breite(Zum_Drucken[x - 1])) * 0.12);
+
+
+                            if (SonderZeichen.Contains(Zum_Drucken[x - 1]))
+                            {
+                                SonderZeichen_Drucken(Zeile, Zum_Drucken[x - 1], M3.ToString(), M5.ToString());
+                                M3 = 0;
+                                AnzahlVonABSt = 0;
+                                continue;
+                            }
+                            int höhe = (Int32.Parse(Zeilen_Höhe[Zeile].Text) * 40);
+                            Motoren_1A_2A_3R_4A_5R(höhe, Zum_Drucken[x - 1].ToString(), M3.ToString(), M5.ToString());
+                        }
+                        Motoren_stehen();
+                        Stempel_ab(Zum_Drucken[x - 1]);
+                        Stempel_auf();
+                        bool Stmp = true;
+                        while (Stmp)
+                        {
+                            Stmp = !Stempel_prüfen();
+                        }
+                        Trennung();
+                        M3 = 0;
+                        AnzahlVonABSt = 0;
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.ToString());
+                    }
+                }
+                Motore_5_Drehen_Relativ("20");
+                Tisch_init = 0;
+            }
+            StartPunkt();
+            myport.WriteLine("O30"); // Pumpe aus
+            
+            TextSpeichernOrDrucken.Enabled = true;
+            this.ActiveControl = null;
+            Druck_done = true;
+        }
 
         // Die Sonderzeichen Drucken
-        private void SonderZeichen_Drucken(char v, string M3 = "0", string M5 = "0", string abst = "0")
+        private void SonderZeichen_Drucken(TextBox Zeile, char v, string M3 = "0", string M5 = "0", string abst = "0")
         {
             char b = ' ';
             char Sonder = ' ';
@@ -1205,8 +1396,8 @@ namespace WinFormsApp1
                 b = 'a';
                 Sonder = '`';
             }
-            //MotorenDrehen(b);
-            Motoren_1A_2A_3R_4A_5R(b.ToString(), M3, M5, "1", Int32.Parse(abst));
+            int höhe = (Int32.Parse(Zeilen_Höhe[Zeile].Text) * 40);
+            Motoren_1A_2A_3R_4A_5R(höhe, b.ToString(), M3, M5, "1", Int32.Parse(abst));
             Motoren_stehen();
             Stempel_ab(b);
             Stempel_auf();
@@ -1216,8 +1407,8 @@ namespace WinFormsApp1
                 Stmp = !Stempel_prüfen();
             }
             Trennung();
-            string sdr = TIsch_Pos_bringen(v.ToString());
-            Motoren_1A_2A_3R_4A_5R(Sonder.ToString(), "0", M5, sdr);
+            string sdr = Tisch_Pos_bringen(v.ToString());
+            Motoren_1A_2A_3R_4A_5R(höhe, Sonder.ToString(), "0", M5, sdr);
             Motoren_stehen();
             Stempel_ab(Sonder);
             Stempel_auf();
@@ -1229,7 +1420,20 @@ namespace WinFormsApp1
             Trennung();
         }
 
-        private string TIsch_Pos_bringen(string x)
+        // Anzahl der Zeichen in einer Zeile zählen
+        private int Anzahl_Zeichen(TextBox t)
+        {
+            int a = 0;
+            foreach (char c in t.Text.Trim())
+            {
+                if (Abstände.Contains(c)) continue;
+                a++;
+            }
+            return a;
+        }
+
+        // Tisch Position aus Datenbank aufrunfen
+        private string Tisch_Pos_bringen(string x)
         {
             string TischPos = "";
             string connStr = "server=localhost;user=root;database=movedb;port=3306;password=6540";
@@ -1292,7 +1496,7 @@ namespace WinFormsApp1
             druck = Convert.ToInt32(dk);
             myport.WriteLine("A" + druck.ToString()); // Schick PWM-signal von Arduino an Ventil 1
             myport.WriteLine("O11"); // Ventil ab (nach unten)
-            Thread.Sleep(1000);
+            Thread.Sleep((int)Druckzeit.Value * 20);
         }
 
         // Stempel auf (nach oben bewegen)
@@ -1333,222 +1537,10 @@ namespace WinFormsApp1
             return (X == "1");
         }
 
-        // Motoren 1,2 und 4 mit Drehen Anfangen
-        private void MotorenDrehen(char x, int y = 1)
+        // Motoren Drehen
+        private void Motoren_1A_2A_3R_4A_5R (int Hohe ,string _124, string _3, string _5, string t = "1", int ab = 0)
         {
-            int XPos = 0, YPos = 0, TischPos = 0;
-            string connStr = "server=localhost;user=root;database=movedb;port=3306;password=6540";
-            MySqlConnection conn = new MySqlConnection(connStr);
-            try
-            {
-                conn.Open();
-                string sql = "select XPos, YPos, TischPos from tabelle" + Schriftgröße + " where Zeichen = '" + x + "' COLLATE utf8mb4_bin";
-                MySqlCommand cmd = new MySqlCommand(sql, conn);
-                MySqlDataReader rdr = cmd.ExecuteReader();
-
-                while (rdr.Read())
-                {
-                    XPos = Int32.Parse(rdr["XPos"].ToString());
-                    YPos = Int32.Parse(rdr["YPos"].ToString());
-                    TischPos = Int32.Parse(rdr["TischPos"].ToString());
-                }
-                rdr.Close();
-            }
-
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
-
-            if(XPos != 0 && YPos != 0)
-            {
-                // Motor 1
-                string message = "#1p2\r";  //Positionierart Absolut Motor 1
-                myport2.WriteLine(message);
-                Thread.Sleep(50);
-                string auslesen = myport2.ReadExisting();
-
-                message = "#1s" + XPos.ToString() + "\r";
-                myport2.WriteLine(message);
-                Thread.Sleep(50);
-                auslesen = myport2.ReadExisting();
-                Thread.Sleep(100);
-
-                message = "#1A\r";
-                myport2.WriteLine(message);
-                Thread.Sleep(50);
-                auslesen = myport2.ReadExisting();
-
-                // Motor 2
-                message = "#" + (char)2 + "p2\r";  //Positionierart Absolut Motor 2
-                myport2.WriteLine(message);
-                Thread.Sleep(50);
-                auslesen = myport2.ReadExisting();
-
-                message = "#" + (char)2 + "d1\r"; //Drehrichtung links
-                myport2.WriteLine(message);
-                Thread.Sleep(50);
-                auslesen = myport2.ReadExisting();
-
-                message = "#" + (char)2 + "s" + YPos.ToString() + "\r";
-                myport2.WriteLine(message);
-                Thread.Sleep(50);
-                auslesen = myport2.ReadExisting();
-
-                message = "#" + (char)2 + "A\r";
-                myport2.WriteLine(message);
-                Thread.Sleep(50);
-                auslesen = myport2.ReadExisting();
-            }
-            // Motoren_stehen();
-            // Motor 4
-            if (TischPos != 0 && y == 1)
-            {
-                int Show = (TischPos + Tisch_init);
-                Motore_4_Drehen_Absolut(Show.ToString());
-            }
-        }
-
-        // Motor 3 Absolut Drehen
-        private void Motore_3_Drehen(string x)
-        {
-            // Motor 3
-            string message = "#" + (char)3 + "p2\r";
-            myport2.WriteLine(message);
-            Thread.Sleep(50);
-            string auslesen = myport2.ReadExisting();
-
-            message = "#" + (char)3 + "d2\r"; //Drehrichtung rechts
-            myport2.WriteLine(message);
-            Thread.Sleep(50);
-            auslesen = myport2.ReadExisting();
-
-            message = "#" + (char)3 + "s" + x + "\r";
-            myport2.WriteLine(message);
-            Thread.Sleep(50);
-            auslesen = myport2.ReadExisting();
-
-            message = "#" + (char)3 + "A\r";
-            myport2.WriteLine(message);
-            Thread.Sleep(50);
-            auslesen = myport2.ReadExisting();
-        }
-
-        // Motor 3 Relativ Drehen
-        private void Motore_3_Drehen_Relativ(string x)
-        {
-            // Motor 3
-            string message = "#" + (char)3 + "p1\r";
-            myport2.WriteLine(message);
-            Thread.Sleep(50);
-            string auslesen = myport2.ReadExisting();
-
-            message = "#" + (char)3 + "d1\r"; //Drehrichtung links
-            myport2.WriteLine(message);
-            Thread.Sleep(50);
-            auslesen = myport2.ReadExisting();
-
-            message = "#" + (char)3 + "s" + x + "\r";
-            myport2.WriteLine(message);
-            Thread.Sleep(50);
-            auslesen = myport2.ReadExisting();
-
-            message = "#" + (char)3 + "A\r";
-            myport2.WriteLine(message);
-            Thread.Sleep(50);
-            auslesen = myport2.ReadExisting();
-        }
-
-        // Motor 4 Absolut Drehen
-        private void Motore_4_Drehen_Absolut(string x)
-        {
-            // Motor 4
-            string message = "#" + (char)4 + "p2\r";
-            myport2.WriteLine(message);
-            Thread.Sleep(50);
-            string auslesen = myport2.ReadExisting();
-
-            /*message = "#" + (char)4 + "d1\r"; //Drehrichtung links
-            myport2.WriteLine(message);
-            Thread.Sleep(50);
-            auslesen = myport2.ReadExisting();*/
-
-            message = "#" + (char)4 + "s" + x + "\r";
-            myport2.WriteLine(message);
-            Thread.Sleep(50);
-            auslesen = myport2.ReadExisting();
-
-            message = "#" + (char)4 + "A\r";
-            myport2.WriteLine(message);
-            Thread.Sleep(50);
-            auslesen = myport2.ReadExisting();
-        }
-
-        // Motor 4 Relativ Drehen
-        private void Motore_4_Drehen_Relativ(string x)
-        {
-            
-            // Motor 4
-            string message = "#" + (char)4 + "p1\r";
-            myport2.WriteLine(message);
-            Thread.Sleep(20);
-            string auslesen = myport2.ReadExisting();
-
-            message = "#" + (char)4 + "d0\r"; //Drehrichtung links
-            myport2.WriteLine(message);
-            Thread.Sleep(20);
-            auslesen = myport2.ReadExisting();
-
-            message = "#" + (char)4 + "s" + x + "\r";
-            myport2.WriteLine(message);
-            Thread.Sleep(20);
-            auslesen = myport2.ReadExisting();
-
-            message = "#" + (char)4 + "A\r";
-            myport2.WriteLine(message);
-            Thread.Sleep(20);
-            auslesen = myport2.ReadExisting();
-            //Tisch_init = Int32.Parse(x);
-        }
-
-
-        private void Motoren_3_A_4_A(string x, string y)
-        {
-            string message = "#" + (char)3 + "p2\r";
-            myport2.WriteLine(message);
-            Thread.Sleep(20);
-
-            message = "#" + (char)4 + "p1\r";
-            myport2.WriteLine(message);
-
-            Thread.Sleep(50);
-
-            message = "#" + (char)4 + "d0\r"; //Drehrichtung links
-            myport2.WriteLine(message);
-            Thread.Sleep(20);
-
-            message = "#" + (char)3 + "s" + x + "\r";
-            myport2.WriteLine(message);
-            Thread.Sleep(20);
-
-            message = "#" + (char)4 + "s" + y + "\r";
-            myport2.WriteLine(message);
-
-            Thread.Sleep(50);
-
-            message = "#" + (char)3 + "A\r";
-            myport2.WriteLine(message);
-            Thread.Sleep(20);
-
-            message = "#" + (char)4 + "A\r";
-            myport2.WriteLine(message);
-
-            Thread.Sleep(50);
-        }
-
-        private void Motoren_1A_2A_3R_4A_5R (string _124, string _3, string _5, string t = "1", int ab = 0)
-        {
-            Tisch_init = (Int32.Parse(HoeheZeile1.Text) * 40);
+            Tisch_init = Hohe;
             int XPos = 0, YPos = 0, TischPos = 0;
             string connStr = "server=localhost;user=root;database=movedb;port=3306;password=6540";
             MySqlConnection conn = new MySqlConnection(connStr);
@@ -2132,6 +2124,27 @@ namespace WinFormsApp1
             return y;
         }
 
+        // Den Druck speicher bzw. ändern in Datenbank nach dem Druck
+        private void Zum_DB()
+        {
+            if (Satz_Nr.Text == "")
+            {
+                if (CheckEveryZeileHasHöhe() == false) { return; }
+                CreateNullForDatenbank();
+                try
+                {
+                    DruckSpeichern("Druckdatei", true);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+            }
+            else
+            {
+                DruckÄndern("Druckdatei", true);
+            }
+        }
         private void ArchivdruckToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DruckSuchen frm2 = new DruckSuchen("Archiv");
@@ -2274,18 +2287,31 @@ namespace WinFormsApp1
         }
 
         // 'Ged'-Spalte erstellen (muss man mit 'x' erweitern, wenn es gedruckt ist)
-        private string CreateGedLangDruck()
+        private string CreateGedLangDruck(bool gedruckt = false)
         {
             string Ged = "L";
             int SchriftInt = SchriftGröße.SelectedIndex + 1;
             string SchriftChar = SchriftInt.ToString();
 
-            Ged = (Zeile1.Text == "") ? Ged + "0" : Ged + SchriftChar;
-            Ged = (Zeile2.Text == "") ? Ged + "0" : Ged + SchriftChar;
-            Ged = (Zeile3.Text == "") ? Ged + "0" : Ged + SchriftChar;
-            Ged = (Zeile4.Text == "") ? Ged + "0" : Ged + SchriftChar;
-            Ged = (Zeile5.Text == "") ? Ged + "0" : Ged + SchriftChar;
-            Ged = (Zeile6.Text == "") ? Ged + "0" : Ged + SchriftChar;
+            if (!gedruckt)
+            {
+
+                Ged = (Zeile1.Text == "") ? Ged + "0" : Ged + SchriftChar;
+                Ged = (Zeile2.Text == "") ? Ged + "0" : Ged + SchriftChar;
+                Ged = (Zeile3.Text == "") ? Ged + "0" : Ged + SchriftChar;
+                Ged = (Zeile4.Text == "") ? Ged + "0" : Ged + SchriftChar;
+                Ged = (Zeile5.Text == "") ? Ged + "0" : Ged + SchriftChar;
+                Ged = (Zeile6.Text == "") ? Ged + "0" : Ged + SchriftChar;
+            }
+            else 
+            {
+                Ged = (Zeile1.Text == "") ? Ged + "0" : Ged + "x";
+                Ged = (Zeile2.Text == "") ? Ged + "0" : Ged + "x";
+                Ged = (Zeile3.Text == "") ? Ged + "0" : Ged + "x";
+                Ged = (Zeile4.Text == "") ? Ged + "0" : Ged + "x";
+                Ged = (Zeile5.Text == "") ? Ged + "0" : Ged + "x";
+                Ged = (Zeile6.Text == "") ? Ged + "0" : Ged + "x";
+            }
 
             return Ged;
         }
@@ -2327,11 +2353,13 @@ namespace WinFormsApp1
             {
                 Zeile1, Zeile2, Zeile3, Zeile4, Zeile5, Zeile6,
                 HoeheZeile1, HoeheZeile2, HoeheZeile3, HoeheZeile4, HoeheZeile5, HoeheZeile6,
-                Sperren1, Sperren2, Sperren3, Sperren4, Sperren5, Sperren6, BandNr, Satz_Nr
+                Sperren1, Sperren2, Sperren3, Sperren4, Sperren5, Sperren6, BandNr, Satz_Nr, LaengeZeile1
+                , LaengeZeile2, LaengeZeile3, LaengeZeile4, LaengeZeile5, LaengeZeile6
             };
             foreach (TextBox t in textBoxes)
             {
                 t.Text = "";
+                t.BackColor = Color.White;
             }
             AbstandVonAussen.Value = 100;
             Breite.SelectedIndex = -1;
@@ -2339,13 +2367,13 @@ namespace WinFormsApp1
         }
 
         // Speichern von Druck in Druckdatei oder Archiv oder beides
-        private void DruckSpeichern(string SaveIn)
+        private void DruckSpeichern(string SaveIn, bool gedruckt = false)
         {
             DateTime dt1 = DateTime.Now;
             string Datum = "\"" + dt1.ToString() + "\"";
             int breite = (Breite.Text == "") ? -1 : BreiteToDatenBank(Int32.Parse(Breite.Text));
             int farbe = (FarbeEingabe.Text == "") ? -1 : FarbeEingabe.SelectedIndex + 1;
-            string Ged = "\"" + CreateGedLangDruck() + "\"";
+            string Ged = "\"" + CreateGedLangDruck(gedruckt) + "\"";
             string schrift = (SchriftGröße.SelectedIndex + 1).ToString();
             string connStr = "server=localhost;user=root;database=movedb;port=3306;password=6540";
             MySqlConnection conn = new MySqlConnection(connStr);
@@ -2394,191 +2422,8 @@ namespace WinFormsApp1
             UngedruckteZeilenBerechnen();
         }
 
-        private void Sperren1_TextChanged(object sender, EventArgs e)
-        {
-            SchritGrößeÄndernFürLänge(Zeile1, LaengeZeile1);
-        }
-
-        private void Sperren2_TextChanged(object sender, EventArgs e)
-        {
-            SchritGrößeÄndernFürLänge(Zeile2, LaengeZeile2);
-        }
-
-        private void Sperren3_TextChanged(object sender, EventArgs e)
-        {
-            SchritGrößeÄndernFürLänge(Zeile3, LaengeZeile3);
-        }
-
-        private void Sperren4_TextChanged(object sender, EventArgs e)
-        {
-            SchritGrößeÄndernFürLänge(Zeile4, LaengeZeile4);
-        }
-
-        private void Sperren5_TextChanged(object sender, EventArgs e)
-        {
-            SchritGrößeÄndernFürLänge(Zeile5, LaengeZeile5);
-        }
-
-        private void Sperren6_TextChanged(object sender, EventArgs e)
-        {
-            SchritGrößeÄndernFürLänge(Zeile6, LaengeZeile6);
-        }
-
-        // Druck aus Datenbank aufrufen
-        private void DruckAufrufen(string SelectDruck)
-        {
-            string connStr = "server=localhost;user=root;database=movedb;port=3306;password=6540";
-            MySqlConnection conn = new MySqlConnection(connStr);
-
-            try
-            {
-                conn.Open();
-                string sql = "select * from " + AktuellDatei + " where nr = " + SelectDruck;
-                MySqlCommand cmd = new MySqlCommand(sql, conn);
-                MySqlDataReader rdr = cmd.ExecuteReader();
-                while (rdr.Read())
-                {
-                    Satz_Nr.Text = rdr["nr"].ToString();
-                    Zeile1.Text = rdr["Zeile1"].ToString();
-                    Zeile2.Text = rdr["Zeile2"].ToString();
-                    Zeile3.Text = rdr["Zeile3"].ToString();
-                    Zeile4.Text = rdr["Zeile4"].ToString();
-                    Zeile5.Text = rdr["Zeile5"].ToString();
-                    Zeile6.Text = rdr["Zeile6"].ToString();
-                    HoeheZeile1.Text = rdr["Höhe1"].ToString();
-                    HoeheZeile2.Text = rdr["Höhe2"].ToString();
-                    HoeheZeile3.Text = rdr["Höhe3"].ToString();
-                    HoeheZeile4.Text = rdr["Höhe4"].ToString();
-                    HoeheZeile5.Text = rdr["Höhe5"].ToString();
-                    HoeheZeile6.Text = rdr["Höhe6"].ToString();
-                    Sperren1.Text = rdr["Sperren1"].ToString();
-                    Sperren2.Text = rdr["Sperren2"].ToString();
-                    Sperren3.Text = rdr["Sperren3"].ToString();
-                    Sperren4.Text = rdr["Sperren4"].ToString();
-                    Sperren5.Text = rdr["Sperren5"].ToString();
-                    Sperren6.Text = rdr["Sperren6"].ToString();
-                    Breite.SelectedIndex = Int32.Parse(rdr["BandBr"].ToString());
-                    BandNr.Text = rdr["BandNr"].ToString();
-                    AbstandVonAussen.Value = Int32.Parse(rdr["AbstvU"].ToString());
-                    if (Int32.Parse(rdr["Schrift"].ToString()) != -1)
-                    {
-                        SchriftGröße.SelectedIndex = Int32.Parse(rdr["Schrift"].ToString()) - 1;
-                    }
-                    else { SchriftGröße.SelectedIndex = -1; }
-
-                    if (Int32.Parse(rdr["Farbe"].ToString()) != -1)
-                    {
-                        FarbeEingabe.SelectedIndex = Int32.Parse(rdr["Farbe"].ToString()) - 1;
-                    }
-                    else { FarbeEingabe.SelectedIndex = -1; }
-                }
-                rdr.Close();
-                CheckLängsteZeile(LaengeZeile1);
-            }
-
-            catch(Exception e) 
-            { 
-                MessageBox.Show(e.ToString());
-                EmptyTheFields();
-            }
-        }
-
-        private void ausdruckToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void DrToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            AktuellDatei = "Druckdatei";
-            DruckAufrufen("(select max(nr) from druckdatei);");
-            AktuellDruck = Satz_Nr.Text;
-            label3.Text = AktuellDatei;
-        }
-
-        private void LetzterDruckArchivToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            AktuellDatei = "Archiv";
-            DruckAufrufen("(select max(nr) from Archiv);");
-            AktuellDruck = Satz_Nr.Text;
-            label3.Text = AktuellDatei;
-        }
-
-        private void BandToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            BandNr.Focus();
-        }
-
-        private void DruckfarbeToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            FarbeEingabe.Focus();
-        }
-
-        private void VorherigerDruck_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(AktuellDruck))
-            {
-                drToolStripMenuItem.PerformClick();
-            }
-            else
-            {
-                try
-                {
-                    DruckAufrufen("(select max(nr) from "+ AktuellDatei + " where nr < " + AktuellDruck + ");");
-                    AktuellDruck = Satz_Nr.Text;
-                }
-                catch { return; }
-            }
-        }
-
-        private void NächsterDruck_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(AktuellDruck))
-            {
-                DruckAufrufen("(select min(nr) from druckdatei);");
-                AktuellDruck = Satz_Nr.Text;
-            }
-            else
-            {
-                try
-                {
-                    DruckAufrufen("(select min(nr) from " + AktuellDatei + " where nr > " + AktuellDruck + ");");
-                    AktuellDruck = Satz_Nr.Text;
-                }
-                catch { return; }
-            }
-        }
-
-        private void DruckLöschenToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            DialogResult dr;
-            dr = MessageBox.Show("den Druck wirklich löschen?", "", MessageBoxButtons.YesNo);
-            if (dr == DialogResult.Yes)
-            {
-                try
-                {
-                    if (AktuellDatei == "Archiv")
-                    {
-                        DruckLöschen("Archiv");
-                    }
-                    else
-                    {
-                        DruckLöschen("Druckdatei");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.ToString());
-                }
-            }
-            else if (dr == DialogResult.No)
-            {
-                return;
-            }
-        }
-
         // Änderungen speichern
-        private void DruckÄndern(string AktuellDatei)
+        private void DruckÄndern(string AktuellDatei, bool gedruckt = false)
         {
             if (CheckEveryZeileHasHöhe() == false) { return; }
             CreateNullForDatenbank();
@@ -2587,7 +2432,7 @@ namespace WinFormsApp1
             string Datum = "\"" + dt1.ToString() + "\"";
             int breite = (Breite.Text == "") ? -1 : BreiteToDatenBank(Int32.Parse(Breite.Text));
             int farbe = (FarbeEingabe.Text == "") ? -1 : FarbeEingabe.SelectedIndex + 1;
-            string Ged = "\"" + CreateGedLangDruck() + "\"";
+            string Ged = "\"" + CreateGedLangDruck(gedruckt) + "\"";
             string schrift = (SchriftGröße.SelectedIndex + 1).ToString();
             string connStr = "server=localhost;user=root;database=movedb;port=3306;password=6540";
             MySqlConnection conn = new MySqlConnection(connStr);
@@ -2629,6 +2474,429 @@ namespace WinFormsApp1
             }
             conn.Close();
         }
+
+        private void Sperren1_TextChanged(object sender, EventArgs e)
+        {
+            SchritGrößeÄndernFürLänge(Zeile1, LaengeZeile1);
+        }
+
+        private void Sperren2_TextChanged(object sender, EventArgs e)
+        {
+            SchritGrößeÄndernFürLänge(Zeile2, LaengeZeile2);
+        }
+
+        private void Sperren3_TextChanged(object sender, EventArgs e)
+        {
+            SchritGrößeÄndernFürLänge(Zeile3, LaengeZeile3);
+        }
+
+        private void Sperren4_TextChanged(object sender, EventArgs e)
+        {
+            SchritGrößeÄndernFürLänge(Zeile4, LaengeZeile4);
+        }
+
+        private void Sperren5_TextChanged(object sender, EventArgs e)
+        {
+            SchritGrößeÄndernFürLänge(Zeile5, LaengeZeile5);
+        }
+
+        private void Sperren6_TextChanged(object sender, EventArgs e)
+        {
+            SchritGrößeÄndernFürLänge(Zeile6, LaengeZeile6);
+        }
+
+        // letzter Druck in Druckmode aufrufen
+        private void automSuchenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SchriftGröße.SelectedIndex = Int32.Parse(Platte.Text) - 1;
+            DruckAufrufen("(select max(nr) from druckdatei where Ged Like \"%" +
+                (SchriftGröße.SelectedIndex + 1).ToString() + "%\")");
+            AktuellDruck = Satz_Nr.Text;
+        }
+
+        // Dauersuchen
+        private void dauersuchenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            EmptyTheFields();
+            while (true)
+            {
+                automSuchenToolStripMenuItem.PerformClick();
+                if (Satz_Nr.Text == "")
+                {
+                    MessageBox.Show("Alle Schleifen sind gedruckt!");
+                    return;
+                }
+                TextSpeichernOrDrucken.PerformClick();
+                DialogResult dr;
+                dr = MessageBox.Show("Nächster Druck drucken?", "", MessageBoxButtons.YesNo);
+                if (dr == DialogResult.Yes)
+                {
+                    continue;
+                }
+                else
+                {
+                    return;
+                }
+            }
+            
+        }
+
+        
+
+        // Druck aus Datenbank aufrufen
+        private void DruckAufrufen(string SelectDruck, string auto = " and Ged like \"L%\"")
+        {
+            string connStr = "server=localhost;user=root;database=movedb;port=3306;password=6540";
+            MySqlConnection conn = new MySqlConnection(connStr);
+            string Ged;
+            try
+            {
+                conn.Open();
+                string sql = "select * from " + AktuellDatei + " where nr = " + SelectDruck + auto;
+                MySqlCommand cmd = new MySqlCommand(sql, conn);
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                while (rdr.Read())
+                {
+                    Satz_Nr.Text = rdr["nr"].ToString();
+                    Zeile1.Text = rdr["Zeile1"].ToString();
+                    Zeile2.Text = rdr["Zeile2"].ToString();
+                    Zeile3.Text = rdr["Zeile3"].ToString();
+                    Zeile4.Text = rdr["Zeile4"].ToString();
+                    Zeile5.Text = rdr["Zeile5"].ToString();
+                    Zeile6.Text = rdr["Zeile6"].ToString();
+                    HoeheZeile1.Text = rdr["Höhe1"].ToString();
+                    HoeheZeile2.Text = rdr["Höhe2"].ToString();
+                    HoeheZeile3.Text = rdr["Höhe3"].ToString();
+                    HoeheZeile4.Text = rdr["Höhe4"].ToString();
+                    HoeheZeile5.Text = rdr["Höhe5"].ToString();
+                    HoeheZeile6.Text = rdr["Höhe6"].ToString();
+                    Sperren1.Text = rdr["Sperren1"].ToString();
+                    Sperren2.Text = rdr["Sperren2"].ToString();
+                    Sperren3.Text = rdr["Sperren3"].ToString();
+                    Sperren4.Text = rdr["Sperren4"].ToString();
+                    Sperren5.Text = rdr["Sperren5"].ToString();
+                    Sperren6.Text = rdr["Sperren6"].ToString();
+                    Breite.SelectedIndex = Int32.Parse(rdr["BandBr"].ToString());
+                    BandNr.Text = rdr["BandNr"].ToString();
+                    AbstandVonAussen.Value = Int32.Parse(rdr["AbstvU"].ToString());
+                    if (Int32.Parse(rdr["Schrift"].ToString()) != -1)
+                    {
+                        SchriftGröße.SelectedIndex = Int32.Parse(rdr["Schrift"].ToString()) - 1;
+                    }
+                    else { SchriftGröße.SelectedIndex = -1; }
+
+                    if (Int32.Parse(rdr["Farbe"].ToString()) != -1)
+                    {
+                        FarbeEingabe.SelectedIndex = Int32.Parse(rdr["Farbe"].ToString()) - 1;
+                    }
+                    else { FarbeEingabe.SelectedIndex = -1; }
+                    Ged = rdr["Ged"].ToString();
+                    BackGroundFarben(Ged);
+                }
+                rdr.Close();
+                CheckLängsteZeile(LaengeZeile1);
+            }
+
+            catch(Exception e) 
+            { 
+                MessageBox.Show(e.ToString());
+                EmptyTheFields();
+            }
+        }
+
+        private void teildruckToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FensterWechseln.PerformClick();
+            TextSpeichernOrDrucken.Enabled = false;
+            this.ActiveControl = null;
+
+            if (!Referencefahrt_done)
+            {
+                MessageBox.Show("Eine Referenzfahrt ist vorher nötig!");
+                TextSpeichernOrDrucken.Enabled = true;
+
+                return;
+            }
+            if (Platte_prüfen().Trim() != (SchriftGröße.SelectedIndex + 1).ToString())
+            {
+                MessageBox.Show("Bitte die richtige Platte benutzen!");
+                TextSpeichernOrDrucken.Enabled = true;
+                return;
+            }
+            if (!Bandhalter_prüfen())
+            {
+                MessageBox.Show("Bandhalter schließen!");
+                TextSpeichernOrDrucken.Enabled = true;
+                return;
+            }
+            if (Schriftgröße == -1)
+            {
+                MessageBox.Show("Bitte Schriftgröße wählen!");
+                TextSpeichernOrDrucken.Enabled = true;
+                return;
+            }
+            if (!Check_Höhe_Hier())
+            {
+                MessageBox.Show("Bitte Höhe wählen!");
+                TextSpeichernOrDrucken.Enabled = true;
+                return;
+            }
+            foreach (TextBox t in AlleZeilen)
+            {
+                if (t.SelectedText.Length < 1) continue;
+                else
+                {
+                    myport.WriteLine("O31");
+                    int Sprr = (!string.IsNullOrEmpty(Zeilen_Sperren[t].Text)) ? Int32.Parse(Zeilen_Sperren[t].Text) : 0;
+                    Tisch_init = 8380 - (Int32.Parse(Zeilen_Höhe[t].Text) * 40);
+                    int ABStVA;
+                    if (t == Längste_Zeile)
+                    {
+                        ABStVA = (int)((AbstandVonAussen.Value - 34) * 40);
+                    }
+                    else
+                    {
+                         ABStVA = (int)((float)((AbstandVonAussen.Value - 34) * 40) +
+                                          (float.Parse(Zeilen_Länge[Längste_Zeile].Text) * 20 + (Anzahl_Zeichen(Längste_Zeile) * 10))
+                                          - (float.Parse(Zeilen_Länge[t].Text) * 20 + (Anzahl_Zeichen(t) * 10)));
+                    }
+
+                    int M3 = 0;
+                    bool skip = false; 
+                    for (int x = t.TextLength; x > 0; x--)
+                    {
+                        if (x - 1 < t.SelectionStart)
+                        {
+                            StartPunkt();
+                            myport.WriteLine("O30"); // Pumpe aus
+                            TextSpeichernOrDrucken.Enabled = true;
+                            this.ActiveControl = null;
+                            return;
+                        }
+                        int M5;
+                        try
+                        {
+                            if (x == t.Text.Length)
+                            {
+                                if (x > t.SelectionStart + t.SelectionLength)
+                                {
+                                    skip = true;
+                                    continue;
+                                }
+                                if (SonderZeichen.Contains(t.Text[x - 1]))
+                                {
+                                    SonderZeichen_Drucken(t, t.Text[x - 1], "0", "20", ABStVA.ToString());
+                                    M3 = 0;
+                                    continue;
+                                }
+                                else if (Abstände.Contains(t.Text[x - 1]))
+                                {
+                                    continue;
+                                }
+                            int höhe = (Int32.Parse(Zeilen_Höhe[t].Text) * 40);
+                                Motoren_1A_2A_3R_4A_5R(höhe, t.Text[x - 1].ToString(), M3.ToString(), "20", "1", ABStVA);
+                            }
+                            else
+                            {
+                                if (Abstände.Contains(t.Text[x - 1]))
+                                {
+                                    M3 += Convert.ToInt32((Zeichen_Breite(t.Text[x]) + Zeichen_Breite(t.Text[x - 1])) * 2);
+                                    continue;
+                                }
+                                if (x > t.SelectionStart + t.SelectionLength)
+                                {
+                                    M3 += Convert.ToInt32((Zeichen_Breite(t.Text[x]) + Zeichen_Breite(t.Text[x - 1])) * 2 + 20);
+                                    M3 += Sprr * 20;
+                                    continue;
+                                }
+                                M3 += Convert.ToInt32((Zeichen_Breite(t.Text[x]) + Zeichen_Breite(t.Text[x - 1])) * 2 + 20);
+                                M3 += Sprr * 20;
+                                M5 = Convert.ToInt32((Zeichen_Breite(t.Text[x]) + Zeichen_Breite(t.Text[x - 1])) * 0.12);
+                                if (SonderZeichen.Contains(t.Text[x - 1]))
+                                {
+                                    if (skip)
+                                    {
+                                        SonderZeichen_Drucken(t, t.Text[x - 1], M3.ToString(), M5.ToString(),(ABStVA + M3).ToString());
+                                        skip = false;
+                                    }
+                                    else
+                                    {
+                                        SonderZeichen_Drucken(t, t.Text[x - 1], M3.ToString(), M5.ToString());
+                                    }
+                                    M3 = 0;
+                                    continue;
+                                }
+                                if (skip == true)
+                                {
+                            int höhe = (Int32.Parse(Zeilen_Höhe[t].Text) * 40);
+                                    Motoren_1A_2A_3R_4A_5R(höhe, t.Text[x - 1].ToString(), M3.ToString(), M5.ToString(), "1", ABStVA + M3);
+                                    skip = false;
+                                }
+                                else
+                                {
+                            int höhe = (Int32.Parse(Zeilen_Höhe[t].Text) * 40);
+                                    Motoren_1A_2A_3R_4A_5R(höhe, t.Text[x - 1].ToString(), M3.ToString(), M5.ToString());
+                                }
+                            }
+                            Motoren_stehen();
+                            Stempel_ab(t.Text[x - 1]);
+                            Stempel_auf();
+                            bool Stmp = true;
+                            while (Stmp)
+                            {
+                                Stmp = !Stempel_prüfen();
+                            }
+                            Trennung();
+                            M3 = 0;
+
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.ToString());
+                        }
+                        Motore_5_Drehen_Relativ("20");
+                    }
+                    StartPunkt();
+                    myport.WriteLine("O30"); // Pumpe aus
+                    TextSpeichernOrDrucken.Enabled = true;
+                    this.ActiveControl = null;
+                    return;
+                }
+            }
+            MessageBox.Show("Es wird Kein Text gewählt!");
+            FensterWechseln.PerformClick();
+        }
+
+        private void seite2ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if ((Zeile4.Text.Length > 0) || (Zeile5.Text.Length > 0) || (Zeile6.Text.Length > 0))
+            {
+                Zeilen.Clear();
+                Zeilen.AddRange(new List<TextBox> { Zeile4, Zeile5, Zeile6 });
+                Drucken(Zeilen);
+                Zeilen.Clear();
+                Zeilen.AddRange(new List<TextBox> { Zeile1, Zeile2, Zeile3 });
+                EmptyTheFields();
+            }
+        }
+
+        
+
+        private void BackGroundFarben(String Ged)
+        {
+            if (!Ged.Contains("x"))
+            {
+                foreach (TextBox t in AlleZeilen)
+                {
+                    t.BackColor = Color.White;
+                }
+            }
+            else
+            {
+                for (int i = 1; i < 7; i++)
+                {
+                    if (Ged[i] == 'x')
+                    {
+                        Nummer_Zeilen[i].BackColor= Color.LightPink;
+                    }
+                    else
+                    {
+                        Nummer_Zeilen[i].BackColor = Color.White;
+                    }
+                }
+            }
+        }
+
+        private void DrToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AktuellDatei = "Druckdatei";
+            DruckAufrufen("(select max(nr) from druckdatei)");
+            AktuellDruck = Satz_Nr.Text;
+            label3.Text = AktuellDatei;
+        }
+
+        private void LetzterDruckArchivToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AktuellDatei = "Archiv";
+            DruckAufrufen("(select max(nr) from Archiv);");
+            AktuellDruck = Satz_Nr.Text;
+            label3.Text = AktuellDatei;
+        }
+
+        private void BandToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            BandNr.Focus();
+        }
+
+        private void DruckfarbeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FarbeEingabe.Focus();
+        }
+
+        private void VorherigerDruck_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(AktuellDruck))
+            {
+                drToolStripMenuItem.PerformClick();
+            }
+            else
+            {
+                try
+                {
+                    DruckAufrufen("(select max(nr) from "+ AktuellDatei + " where nr < " + AktuellDruck + ")");
+                    AktuellDruck = Satz_Nr.Text;
+                }
+                catch { return; }
+            }
+        }
+
+        private void NächsterDruck_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(AktuellDruck))
+            {
+                DruckAufrufen("(select min(nr) from druckdatei)");
+                AktuellDruck = Satz_Nr.Text;
+            }
+            else
+            {
+                try
+                {
+                    DruckAufrufen("(select min(nr) from " + AktuellDatei + " where nr > " + AktuellDruck + ")");
+                    AktuellDruck = Satz_Nr.Text;
+                }
+                catch { return; }
+            }
+        }
+
+        private void DruckLöschenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DialogResult dr;
+            dr = MessageBox.Show("den Druck wirklich löschen?", "", MessageBoxButtons.YesNo);
+            if (dr == DialogResult.Yes)
+            {
+                try
+                {
+                    if (AktuellDatei == "Archiv")
+                    {
+                        DruckLöschen("Archiv");
+                    }
+                    else
+                    {
+                        DruckLöschen("Druckdatei");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+            }
+            else if (dr == DialogResult.No)
+            {
+                return;
+            }
+        }
+
+       
 
         private void DruckToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -2712,6 +2980,8 @@ namespace WinFormsApp1
             try { Breite.SelectedIndex = Int32.Parse(brte); } catch { Breite.SelectedIndex = -1; }
             try { AbstandVonAussen.Value = Int32.Parse(AVA); } catch { AbstandVonAussen.Value = 100; }
             try { FarbeEingabe.SelectedIndex = Int32.Parse(frb) - 1; } catch { FarbeEingabe.SelectedIndex = -1; }
+            if (string.IsNullOrEmpty(gedd)) return;
+            BackGroundFarben(gedd);
         }
 
         // die Anzahl der ungedruckten Zeilen berechnen
@@ -2909,16 +3179,32 @@ namespace WinFormsApp1
             TextSpeichernOrDrucken.PerformClick();
         }
 
-        private void teildruckToolStripMenuItem_Click(object sender, EventArgs e)
+        private void StopButton_Click(object sender, EventArgs e)
         {
-
+            backgroundWorker1.RunWorkerAsync();
         }
 
         // Versuch
         private void PumpeAus_Click(object sender, EventArgs e)
         {
             Referencefahrt_done = true;
-        }
+            weiter = false;
 
+        }
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        {
+            weiter = true;
+            myport.WriteLine("O31");
+            if (weiter == false)
+            {
+                DialogResult dr = MessageBox.Show("Continue?", "", MessageBoxButtons.YesNo);
+                if (dr == DialogResult.Yes) { weiter = true; }
+                else
+                {
+                    myport.WriteLine("O30");
+                    return;
+                };
+            }
+        }
     }
 }
