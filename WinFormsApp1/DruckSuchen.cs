@@ -18,6 +18,7 @@ namespace WinFormsApp1
         {
             InitializeComponent();
             this.Datei = Datei;
+            this.Text= Datei;
         }
         // Datei in DataGrid laden
         private void DruckSuchen_Load(object sender, EventArgs e)
@@ -54,7 +55,7 @@ namespace WinFormsApp1
             {
                 MessageBox.Show(ex.Message);
             }
-            DruckSuchenOK.Select();
+            SearchBox.Select();
         }
 
         private void Button2_Click(object sender, EventArgs e)

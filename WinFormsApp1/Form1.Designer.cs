@@ -130,10 +130,10 @@ namespace WinFormsApp1
             this.panel8 = new System.Windows.Forms.Panel();
             this.label26 = new System.Windows.Forms.Label();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.radioButton22 = new System.Windows.Forms.RadioButton();
-            this.radioButton21 = new System.Windows.Forms.RadioButton();
-            this.radioButton20 = new System.Windows.Forms.RadioButton();
-            this.radioButton19 = new System.Windows.Forms.RadioButton();
+            this.Radio_Silber = new System.Windows.Forms.RadioButton();
+            this.Radio_Schwarz = new System.Windows.Forms.RadioButton();
+            this.Radio_gold = new System.Windows.Forms.RadioButton();
+            this.Radio_Alle = new System.Windows.Forms.RadioButton();
             this.label23 = new System.Windows.Forms.Label();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.menuStrip1.SuspendLayout();
@@ -354,6 +354,7 @@ namespace WinFormsApp1
             this.schriftplattWechselnToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
             this.schriftplattWechselnToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
             this.schriftplattWechselnToolStripMenuItem.Text = "Schriftplatt wechseln";
+            this.schriftplattWechselnToolStripMenuItem.Click += new System.EventHandler(this.schriftplattWechselnToolStripMenuItem_Click);
             // 
             // bandbreiteToolStripMenuItem
             // 
@@ -557,7 +558,6 @@ namespace WinFormsApp1
             this.LaengeZeile1.Name = "LaengeZeile1";
             this.LaengeZeile1.Size = new System.Drawing.Size(61, 23);
             this.LaengeZeile1.TabIndex = 14;
-            this.LaengeZeile1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.LaengeZeile1_KeyPress);
             // 
             // HoeheZeile1
             // 
@@ -581,7 +581,6 @@ namespace WinFormsApp1
             this.LaengeZeile2.Name = "LaengeZeile2";
             this.LaengeZeile2.Size = new System.Drawing.Size(61, 23);
             this.LaengeZeile2.TabIndex = 20;
-            this.LaengeZeile2.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.LaengeZeile2_KeyPress);
             // 
             // Sperren2
             // 
@@ -629,7 +628,6 @@ namespace WinFormsApp1
             this.LaengeZeile3.Name = "LaengeZeile3";
             this.LaengeZeile3.Size = new System.Drawing.Size(61, 23);
             this.LaengeZeile3.TabIndex = 26;
-            this.LaengeZeile3.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.LaengeZeile3_KeyPress);
             // 
             // Sperren3
             // 
@@ -677,7 +675,6 @@ namespace WinFormsApp1
             this.LaengeZeile4.Name = "LaengeZeile4";
             this.LaengeZeile4.Size = new System.Drawing.Size(61, 23);
             this.LaengeZeile4.TabIndex = 32;
-            this.LaengeZeile4.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.LaengeZeile4_KeyPress);
             // 
             // Sperren4
             // 
@@ -725,7 +722,6 @@ namespace WinFormsApp1
             this.LaengeZeile5.Name = "LaengeZeile5";
             this.LaengeZeile5.Size = new System.Drawing.Size(61, 23);
             this.LaengeZeile5.TabIndex = 38;
-            this.LaengeZeile5.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.LaengeZeile5_KeyPress);
             // 
             // Sperren5
             // 
@@ -773,7 +769,6 @@ namespace WinFormsApp1
             this.LaengeZeile6.Name = "LaengeZeile6";
             this.LaengeZeile6.Size = new System.Drawing.Size(61, 23);
             this.LaengeZeile6.TabIndex = 44;
-            this.LaengeZeile6.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.LaengeZeile6_KeyPress);
             // 
             // Sperren6
             // 
@@ -1237,10 +1232,10 @@ namespace WinFormsApp1
             // 
             this.tableLayoutPanel1.ColumnCount = 1;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Controls.Add(this.radioButton22, 0, 3);
-            this.tableLayoutPanel1.Controls.Add(this.radioButton21, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.radioButton20, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.radioButton19, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.Radio_Silber, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.Radio_Schwarz, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.Radio_gold, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.Radio_Alle, 0, 0);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(196, 20);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 4;
@@ -1251,47 +1246,47 @@ namespace WinFormsApp1
             this.tableLayoutPanel1.Size = new System.Drawing.Size(132, 149);
             this.tableLayoutPanel1.TabIndex = 73;
             // 
-            // radioButton22
+            // Radio_Silber
             // 
-            this.radioButton22.AutoSize = true;
-            this.radioButton22.Location = new System.Drawing.Point(3, 78);
-            this.radioButton22.Name = "radioButton22";
-            this.radioButton22.Size = new System.Drawing.Size(53, 19);
-            this.radioButton22.TabIndex = 3;
-            this.radioButton22.Text = "silber";
-            this.radioButton22.UseVisualStyleBackColor = true;
+            this.Radio_Silber.AutoSize = true;
+            this.Radio_Silber.Location = new System.Drawing.Point(3, 78);
+            this.Radio_Silber.Name = "Radio_Silber";
+            this.Radio_Silber.Size = new System.Drawing.Size(53, 19);
+            this.Radio_Silber.TabIndex = 3;
+            this.Radio_Silber.Text = "silber";
+            this.Radio_Silber.UseVisualStyleBackColor = true;
             // 
-            // radioButton21
+            // Radio_Schwarz
             // 
-            this.radioButton21.AutoSize = true;
-            this.radioButton21.Location = new System.Drawing.Point(3, 53);
-            this.radioButton21.Name = "radioButton21";
-            this.radioButton21.Size = new System.Drawing.Size(67, 19);
-            this.radioButton21.TabIndex = 2;
-            this.radioButton21.Text = "schwarz";
-            this.radioButton21.UseVisualStyleBackColor = true;
+            this.Radio_Schwarz.AutoSize = true;
+            this.Radio_Schwarz.Location = new System.Drawing.Point(3, 53);
+            this.Radio_Schwarz.Name = "Radio_Schwarz";
+            this.Radio_Schwarz.Size = new System.Drawing.Size(67, 19);
+            this.Radio_Schwarz.TabIndex = 2;
+            this.Radio_Schwarz.Text = "schwarz";
+            this.Radio_Schwarz.UseVisualStyleBackColor = true;
             // 
-            // radioButton20
+            // Radio_gold
             // 
-            this.radioButton20.AutoSize = true;
-            this.radioButton20.Location = new System.Drawing.Point(3, 28);
-            this.radioButton20.Name = "radioButton20";
-            this.radioButton20.Size = new System.Drawing.Size(49, 19);
-            this.radioButton20.TabIndex = 1;
-            this.radioButton20.Text = "gold";
-            this.radioButton20.UseVisualStyleBackColor = true;
+            this.Radio_gold.AutoSize = true;
+            this.Radio_gold.Location = new System.Drawing.Point(3, 28);
+            this.Radio_gold.Name = "Radio_gold";
+            this.Radio_gold.Size = new System.Drawing.Size(49, 19);
+            this.Radio_gold.TabIndex = 1;
+            this.Radio_gold.Text = "gold";
+            this.Radio_gold.UseVisualStyleBackColor = true;
             // 
-            // radioButton19
+            // Radio_Alle
             // 
-            this.radioButton19.AutoSize = true;
-            this.radioButton19.Checked = true;
-            this.radioButton19.Location = new System.Drawing.Point(3, 3);
-            this.radioButton19.Name = "radioButton19";
-            this.radioButton19.Size = new System.Drawing.Size(43, 19);
-            this.radioButton19.TabIndex = 0;
-            this.radioButton19.TabStop = true;
-            this.radioButton19.Text = "alle";
-            this.radioButton19.UseVisualStyleBackColor = true;
+            this.Radio_Alle.AutoSize = true;
+            this.Radio_Alle.Checked = true;
+            this.Radio_Alle.Location = new System.Drawing.Point(3, 3);
+            this.Radio_Alle.Name = "Radio_Alle";
+            this.Radio_Alle.Size = new System.Drawing.Size(43, 19);
+            this.Radio_Alle.TabIndex = 0;
+            this.Radio_Alle.TabStop = true;
+            this.Radio_Alle.Text = "alle";
+            this.Radio_Alle.UseVisualStyleBackColor = true;
             // 
             // label23
             // 
@@ -1302,10 +1297,6 @@ namespace WinFormsApp1
             this.label23.Size = new System.Drawing.Size(33, 19);
             this.label23.TabIndex = 80;
             this.label23.Text = "Info";
-            // 
-            // backgroundWorker1
-            // 
-            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
             // 
             // Form1
             // 
@@ -1327,7 +1318,8 @@ namespace WinFormsApp1
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
-            this.Text = "Langdruck";
+            this.Text = "Längsdruck";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             this.menuStrip1.ResumeLayout(false);
@@ -1448,10 +1440,10 @@ namespace WinFormsApp1
         private System.Windows.Forms.Label label26;
         private System.Windows.Forms.ComboBox SchriftGröße;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.RadioButton radioButton22;
-        private System.Windows.Forms.RadioButton radioButton21;
-        private System.Windows.Forms.RadioButton radioButton20;
-        private System.Windows.Forms.RadioButton radioButton19;
+        private System.Windows.Forms.RadioButton Radio_Silber;
+        private System.Windows.Forms.RadioButton Radio_Schwarz;
+        private System.Windows.Forms.RadioButton Radio_gold;
+        private System.Windows.Forms.RadioButton Radio_Alle;
         private System.Windows.Forms.TextBox Zeile1;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
     }
