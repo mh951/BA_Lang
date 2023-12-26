@@ -1248,7 +1248,7 @@ namespace WinFormsApp1
                 }
                 Motore_5_Drehen_Relativ("20");
                 Tisch_init = 0;
-                DruckÄndern_Neu("Druckdatei", Zeile);
+                if (Satz_Nr.Text != "") { DruckÄndern_Neu("Druckdatei", Zeile); }
                 this.BeginInvoke(new MethodInvoker(() =>
                 {
                     UngedruckteZeilenBerechnen();
@@ -2087,6 +2087,7 @@ namespace WinFormsApp1
             {
                 conn.Open();
                 string x = Zeile.Text.Trim();
+                int AnzahZeichen = x.Length - 1;
                 double y = 0;
                 string strC = "";
                 foreach (char c in x)
@@ -2644,17 +2645,17 @@ namespace WinFormsApp1
                 {
                     return;
                 }
-                if (Satz_Nr.Text == "")
-                {
-                    try
-                    {
-                        DruckSpeichern("Druckdatei");
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.ToString());
-                    }
-                }
+                //if (Satz_Nr.Text == "")
+                //{
+                //    try
+                //    {
+                //        DruckSpeichern("Druckdatei");
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        MessageBox.Show(ex.ToString());
+                //    }
+                //}
                 Zeilen.Clear();
                 Zeilen.AddRange(new List<TextBox> { Zeile1, Zeile2, Zeile3 });
                 //Drucken(Zeilen);
@@ -3030,6 +3031,11 @@ namespace WinFormsApp1
                 TextSpeichernOrDrucken.Enabled = true;
                 return;
             }
+            if (!Bandhalter_prüfen())
+            {
+                MessageBox.Show("Bandhalter schließen!");
+                return;
+            }
             MessageBox.Show("Heizung herunterdrehen!");
 
             myport2.ReadExisting();
@@ -3116,6 +3122,7 @@ namespace WinFormsApp1
 
             string Add_Farbe = " and Farbe = " + Farbe;
             if (Radio_Alle.Checked) Add_Farbe = "";
+            AktuellDatei = "druckdatei";
             SchriftGröße.SelectedIndex = Int32.Parse(Platte.Text) - 1;
             DruckAufrufen("(select max(nr) from druckdatei where Ged Like \"%" +
                 (SchriftGröße.SelectedIndex + 1).ToString() + "%\"" + Add_Farbe + ")");
