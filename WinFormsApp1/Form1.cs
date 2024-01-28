@@ -2087,7 +2087,7 @@ namespace WinFormsApp1
             {
                 conn.Open();
                 string x = Zeile.Text.Trim();
-                int AnzahZeichen = x.Length - 1;
+                //int AnzahZeichen = x.Length - 1;
                 double y = 0;
                 string strC = "";
                 foreach (char c in x)
@@ -2321,21 +2321,21 @@ namespace WinFormsApp1
             try
             {
                 conn.Open();
-                string sql1 = "select sum(Length(ged) - length(replace(ged, \"1\", \"\"))) from druckdatei;";
+                string sql1 = "select sum(Length(ged) - length(replace(ged, \"1\", \"\"))) from druckdatei WHERE ged LIKE \"L%\";";
                 MySqlCommand cmd1 = new MySqlCommand(sql1, conn);
                 object result1 = cmd1.ExecuteScalar();
                 if (result1 != null)
                 {
                     p1 = Convert.ToInt32(result1);
                 }
-                string sql2 = "select sum(Length(ged) - length(replace(ged, \"2\", \"\"))) from druckdatei;";
+                string sql2 = "select sum(Length(ged) - length(replace(ged, \"2\", \"\"))) from druckdatei WHERE ged LIKE \"L%\";";
                 MySqlCommand cmd2 = new MySqlCommand(sql2, conn);
                 object result2 = cmd2.ExecuteScalar();
                 if (result2 != null)
                 {
                     p2 = Convert.ToInt32(result2);
                 }
-                string sql3 = "select sum(Length(ged) - length(replace(ged, \"3\", \"\"))) from druckdatei;";
+                string sql3 = "select sum(Length(ged) - length(replace(ged, \"3\", \"\"))) from druckdatei WHERE ged LIKE \"L%\";";
                 MySqlCommand cmd3 = new MySqlCommand(sql3, conn);
                 object result3 = cmd3.ExecuteScalar();
                 if (result3 != null)
@@ -2532,7 +2532,7 @@ namespace WinFormsApp1
             foreach (TextBox t in AlleZeilen)
             {
                 if (Zeilen_Länge[t].Text == "") continue;
-                if (Convert.ToDouble(Zeilen_Länge[t].Text) >= 710)
+                if (Convert.ToDouble(Zeilen_Länge[t].Text) >= 670)
                 {
                     MessageBox.Show("Text wird zu lang!");
                     return false;
@@ -3211,17 +3211,6 @@ namespace WinFormsApp1
                     Tisch_init = 8380 - (Int32.Parse(Zeilen_Höhe[t].Text) * 40);
                     int Mitte = (int)((float)(AbstandVonAussen.Value - 32) + float.Parse(Zeilen_Länge[Längste_Zeile].Text) / 2);
                     int ABStVA = (Mitte - ((int)(float.Parse(Zeilen_Länge[t].Text) / 2))) * 40;
-                    //int ABStVA;
-                    //if (t == Längste_Zeile)
-                    //{
-                    //    ABStVA = (int)((AbstandVonAussen.Value - 34) * 40);
-                    //}
-                    //else
-                    //{
-                    //     ABStVA = (int)((float)((AbstandVonAussen.Value - 34) * 40) +
-                    //                      (float.Parse(Zeilen_Länge[Längste_Zeile].Text) * 20 + (Anzahl_Zeichen(Längste_Zeile) * 10))
-                    //                      - (float.Parse(Zeilen_Länge[t].Text) * 20 + (Anzahl_Zeichen(t) * 10)));
-                    //}
 
                     int M3 = 0;
                     bool skip = false;
@@ -3547,7 +3536,8 @@ namespace WinFormsApp1
                 if (Zeile4.Text == "") { HoeheZeile4.Text = ""; }
                 if (Zeile5.Text == "") { HoeheZeile5.Text = ""; }
                 if (Zeile6.Text == "") { HoeheZeile6.Text = ""; }
-                if (Breite.SelectedIndex == 1) { AbstandVonAussen.Value = 42; }
+                if (Breite.SelectedIndex == 0) { AbstandVonAussen.Value = 42; }
+                else if (Breite.SelectedIndex == 1) { AbstandVonAussen.Value = 42; }
                 else if (Breite.SelectedIndex == 2) { AbstandVonAussen.Value = 45; }
                 else if (Breite.SelectedIndex == 3) { AbstandVonAussen.Value = 60; }
                 else { AbstandVonAussen.Value = 100; }
