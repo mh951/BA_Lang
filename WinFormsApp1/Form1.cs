@@ -907,31 +907,79 @@ namespace WinFormsApp1
         private void Zeile1_TextChanged(object sender, EventArgs e)
         {
             SchritGrößeÄndernFürLänge(Zeile1, LaengeZeile1);
+            if (Zeile1.Text.Length > 0 && (Abstände.Contains(Zeile1.Text[0]) || Abstände.Contains(Zeile1.Text[Zeile1.Text.Length -1])))
+            {
+                Zeile1.ForeColor = Color.Red;
+            }
+            else
+            {
+                Zeile1.ForeColor = Color.Black;
+            }
         }
 
         private void Zeile2_TextChanged(object sender, EventArgs e)
         {
             SchritGrößeÄndernFürLänge(Zeile2, LaengeZeile2);
+            if (Zeile2.Text.Length > 0 && (Abstände.Contains(Zeile2.Text[0]) || Abstände.Contains(Zeile2.Text[Zeile2.Text.Length - 1])))
+            {
+                Zeile2.ForeColor = Color.Red;
+            }
+            else
+            {
+                Zeile2.ForeColor = Color.Black;
+            }
         }
 
         private void Zeile3_TextChanged(object sender, EventArgs e)
         {
             SchritGrößeÄndernFürLänge(Zeile3, LaengeZeile3);
+            if (Zeile3.Text.Length > 0 && (Abstände.Contains(Zeile3.Text[0]) || Abstände.Contains(Zeile3.Text[Zeile3.Text.Length - 1])))
+            {
+                Zeile3.ForeColor = Color.Red;
+            }
+            else
+            {
+                Zeile3.ForeColor = Color.Black;
+            }
         }
 
         private void Zeile4_TextChanged(object sender, EventArgs e)
         {
             SchritGrößeÄndernFürLänge(Zeile4, LaengeZeile4);
+            if (Zeile4.Text.Length > 0 && (Abstände.Contains(Zeile4.Text[0]) || Abstände.Contains(Zeile4.Text[Zeile4.Text.Length - 1])))
+            {
+                Zeile4.ForeColor = Color.Red;
+            }
+            else
+            {
+                Zeile4.ForeColor = Color.Black;
+            }
         }
 
         private void Zeile5_TextChanged(object sender, EventArgs e)
         {
             SchritGrößeÄndernFürLänge(Zeile5, LaengeZeile5);
+            if (Zeile5.Text.Length > 0 && (Abstände.Contains(Zeile5.Text[0]) || Abstände.Contains(Zeile5.Text[Zeile5.Text.Length - 1])))
+            {
+                Zeile5.ForeColor = Color.Red;
+            }
+            else
+            {
+                Zeile5.ForeColor = Color.Black;
+            }
         }
 
         private void Zeile6_TextChanged(object sender, EventArgs e)
         {
             SchritGrößeÄndernFürLänge(Zeile6, LaengeZeile6);
+            if (Zeile6.Text.Length > 0 && (Abstände.Contains(Zeile6.Text[0]) || Abstände.Contains(Zeile6.Text[Zeile6.Text.Length - 1])))
+            {
+                Zeile6.ForeColor = Color.Red;
+            }
+            else
+            {
+                Zeile6.ForeColor = Color.Black;
+            }
         }
 
 
@@ -2087,7 +2135,7 @@ namespace WinFormsApp1
             {
                 conn.Open();
                 string x = Zeile.Text.Trim();
-                //int AnzahZeichen = x.Length - 1;
+                int AnzahZeichen = x.Length - 1;
                 double y = 0;
                 string strC = "";
                 foreach (char c in x)
@@ -2321,21 +2369,21 @@ namespace WinFormsApp1
             try
             {
                 conn.Open();
-                string sql1 = "select sum(Length(ged) - length(replace(ged, \"1\", \"\"))) from druckdatei WHERE ged LIKE \"L%\";";
+                string sql1 = "select sum(Length(ged) - length(replace(ged, \"1\", \"\"))) from druckdatei;";
                 MySqlCommand cmd1 = new MySqlCommand(sql1, conn);
                 object result1 = cmd1.ExecuteScalar();
                 if (result1 != null)
                 {
                     p1 = Convert.ToInt32(result1);
                 }
-                string sql2 = "select sum(Length(ged) - length(replace(ged, \"2\", \"\"))) from druckdatei WHERE ged LIKE \"L%\";";
+                string sql2 = "select sum(Length(ged) - length(replace(ged, \"2\", \"\"))) from druckdatei;";
                 MySqlCommand cmd2 = new MySqlCommand(sql2, conn);
                 object result2 = cmd2.ExecuteScalar();
                 if (result2 != null)
                 {
                     p2 = Convert.ToInt32(result2);
                 }
-                string sql3 = "select sum(Length(ged) - length(replace(ged, \"3\", \"\"))) from druckdatei WHERE ged LIKE \"L%\";";
+                string sql3 = "select sum(Length(ged) - length(replace(ged, \"3\", \"\"))) from druckdatei;";
                 MySqlCommand cmd3 = new MySqlCommand(sql3, conn);
                 object result3 = cmd3.ExecuteScalar();
                 if (result3 != null)
@@ -2532,9 +2580,14 @@ namespace WinFormsApp1
             foreach (TextBox t in AlleZeilen)
             {
                 if (Zeilen_Länge[t].Text == "") continue;
-                if (Convert.ToDouble(Zeilen_Länge[t].Text) >= 670)
+                if (Convert.ToDouble(Zeilen_Länge[t].Text) >= 700)
                 {
                     MessageBox.Show("Text wird zu lang!");
+                    return false;
+                }
+                if (Convert.ToDouble(AbstandVonAussen.Value) + Convert.ToDouble(Zeilen_Länge[t].Text) > 745)
+                {
+                    MessageBox.Show("Text mit Abstand von außen wird zu lang!");
                     return false;
                 }
             }
@@ -3478,10 +3531,7 @@ namespace WinFormsApp1
             }
             else
             {
-                SchriftGröße.SelectedIndex = Int32.Parse(Platte.Text) - 1;
-                DruckAufrufen("(select max(nr) from druckdatei where Ged Like \"%" +
-                    (SchriftGröße.SelectedIndex + 1).ToString() + "%\")");
-                AktuellDruck = Satz_Nr.Text;
+                automSuchenToolStripMenuItem.PerformClick();
             }
         }
 
